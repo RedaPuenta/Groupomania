@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import axios from "axios"
+import router from '../router/index.js'
 
 Vue.use(Vuex)
 
@@ -14,6 +16,7 @@ export default new Vuex.Store({
   },
   actions: {
     neo: function(){
+
       let neo = document.querySelectorAll(".neo")
       for (let i= 0; i < neo.length; i++) {
         let color1 = "#bebebe"
@@ -27,6 +30,27 @@ export default new Vuex.Store({
         } else {
             neo[i].style.boxShadow = `${(H/10)*(L/H)}px ${(H/10)*(L/H)}px ${(H/10)*((L/H)*2)}px ${color1}, ${(H/10)*((L/H)*-1)}px ${(H/10)*((L/H)*-1)}px ${(H/10)*((L/H)*2)}px ${color2}`
         }
+      }
+
+    },
+
+    accessPage: function(){
+  
+      const token = localStorage.getItem("token")
+      const userId = localStorage.getItem("userId")
+
+      if (token !== null && userId !== null) {
+
+        axios.post('http://localhost:3000/api/access', {token: token, userId: userId})
+        .then(() => {})
+        .catch(() => {
+          router.push({name: 'Connexion'})
+        })
+
+      } else {
+
+        router.push({name: 'Connexion'})
+
       }
     }
   },

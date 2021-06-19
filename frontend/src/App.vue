@@ -22,31 +22,28 @@ export default {
   --color-secondary: #e0e0e0;
   --color-third: #f0f0f0;
   --color-fourth: #cacaca;
+  --color-error: rgba(223, 0, 0, 0.849);
 }
 
 body{
   background-color: var(--color-secondary);
   font-family: 'Mulish', sans-serif;
   font-size: 16px;
+  color: var(--color-primary);
 }
 
 *{
   text-decoration: none;
-  color: var(--color-primary);
   margin: 0;
   padding: 0;
   list-style: none;
   border: 0;
   line-height: 1;
-  font: inherit;
   box-sizing: border-box;
+  font-family: 'Mulish', sans-serif;
 }
 
-input[type=file]::-webkit-file-upload-button {
-  display: none;
-}
-
-input, textarea {
+input, textarea, video {
   outline: none;
 }
 

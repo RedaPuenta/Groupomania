@@ -2,7 +2,11 @@ module.exports = (req, res, next) => {
 
     const passwordReq = req.body.password
 
-    if (!/[A-Z]/.test(passwordReq)) {
+    if(/[\s]/.test(passwordReq)) {  
+
+        res.status(400).json({message : "Le mot de passe contient des caractères blancs"})
+
+    } else if (!/[A-Z]/.test(passwordReq)) {
 
         res.status(400).json({message : "Le mot de passe doit contenir au moins 1 majuscule"})
     

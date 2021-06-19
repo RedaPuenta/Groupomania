@@ -6,6 +6,7 @@ import Actuality from '../views/Actuality.vue'
 import Mypost from '../views/Mypost.vue'
 import Favory from '../views/Favory.vue'
 import Friends from '../views/Friends.vue'
+import Account from '../views/Account.vue'
 
 Vue.use(VueRouter)
 
@@ -34,6 +35,11 @@ const routes = [
     path: '/Friends',
     name: 'Friends', 
     component: Friends
+  },
+  {
+    path: '/Account',
+    name: 'Account',
+    component: Account
   }
 ]
 

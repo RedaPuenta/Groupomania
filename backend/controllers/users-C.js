@@ -7,19 +7,34 @@ const db = require("../mysql/connectDB")
 
 exports.signup = (req, res, next) => {
 
-    const emailCrypt = cryptojs.HmacMD5(req.body.email, process.env.CRYPTOJS_SECRET).toString()
-    const id = idGenerator.v1()
+    const userId = idGenerator.v1()
+    const firstName = req.body.prenom
+    const lastName = req.body.nom
+    const emailUser = cryptojs.HmacMD5(req.body.email, process.env.CRYPTOJS_SECRET).toString()
+    const passwordUser = req.body.password
+    const avatar = `${req.protocol}://${req.get('host')}/media/avatar-empty.png`
+    const bio = "Salut tout le monde !"
 
-    bcrypt.hash(req.body.password, 10)
+    bcrypt.hash(passwordUser, 10)
     .then((hash) => {
 
-        db.query("INSERT INTO user (id, email, password, firstName, lastName, userId, avatar, bio, privilege, dateCreation, firstConnection) VALUES(NULL, ?, ?, ?, ?, ?, DEFAULT, DEFAULT, DEFAULT, NOW(), DEFAULT)", 
-        [emailCrypt, hash, req.body.nom, req.body.prenom, id], function(error, results, fields){
+        db.query(`INSERT INTO user (email, password, firstName, lastName, userId, avatar, bio, privilege, dateCreation, firstConnection) 
+            VALUES(?, ?, ?, ?, ?, ?, ?, DEFAULT, NOW(), DEFAULT)`, 
+            [emailUser, hash, firstName, lastName, userId, avatar, bio], 
 
-            if(results.affectedRows == 1){
-                res.status(201).json({message: "Votre compte à été créé !"})   
-            } 
-        })
+            function(error, results, fields){
+
+                if(results.affectedRows == 1){
+
+                    res.status(201).json({message: "Votre compte à été créé !"})   
+
+                } else {
+
+                    res.status(500).json({message: "Votre compte n'a pas pu être créé !"})   
+                    
+                }
+            }
+        )
         
     })
     .catch(() => {res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})})
@@ -28,30 +43,43 @@ exports.signup = (req, res, next) => {
 
 exports.login = (req, res, next) => {
 
-    const emailCrypt = cryptojs.HmacMD5(req.body.email, process.env.CRYPTOJS_SECRET).toString()
+    const emailUser = cryptojs.HmacMD5(req.body.email, process.env.CRYPTOJS_SECRET).toString()
+    const passwordUser = req.body.password
 
-    db.query('SELECT password from user WHERE email=?', [emailCrypt], function(error, results, fields) {
+    db.query(`SELECT password FROM user 
+        WHERE email=?`, 
+        [emailUser], 
+
+        function(error, results, fields) {
+        
+            bcrypt.compare(passwordUser, results[0].password)    
+            .then(valid => {
+                console.log(valid)
+                if(valid === false){
+
+                    res.status(401).json({message: "Le mot de passe est incorrect !"})
+
+                } else {
+
+                    db.query(`SELECT userId FROM user 
+                        WHERE email=?`, 
+                        [emailUser], 
+
+                        function(error, results, fields) {
                     
-        bcrypt.compare(req.body.password, results[0].password)    
-        .then(valid => {
+                            res.status(200).json({
+                                userId: results[0].userId,
+                                token: jwt.sign({userId: results[0].userId}, process.env.JWT_SECRET, {expiresIn: 6 * 31 * 24 * 60 * 60})
+                            })
+                        
+                        }
+                    )
 
-            if(!valid){
+                }
 
-                res.status(401).json({message: "Le mot de passe est incorrect !"})
+            }) 
+            .catch(() => {res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})})
 
-            } else {
-
-                db.query('SELECT userId from user WHERE email=?', [emailCrypt], function(error, results, fields) {
-
-                    res.status(200).json({
-                        userId: results[0].userId,
-                        token: jwt.sign({userId: results[0].userId}, process.env.JWT_SECRET, {expiresIn: "24h"})
-                    })
-                })
-            }
-
-        }) 
-        .catch(() => {res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})})
-
-    })    
+        }
+    )    
 }

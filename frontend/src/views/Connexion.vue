@@ -13,25 +13,40 @@
         <form class="formulaire">
 
             <div v-if="mode == 'register'" class="formulaire__name">
-                <input v-model="prenom" class="neo" type="text" placeholder="Prénom">
-                <input v-model="nom" class="neo" type="text" placeholder="Nom">
+                <input class="neo input" required v-model="prenom" type="text" placeholder="Prénom">
+                <input class="neo input" required v-model="nom" type="text" placeholder="Nom">
             </div>
 
             <div class="formulaire__identifiant">
 
-                <input v-model="email" class="neo" type="mail" placeholder="Email">
-                <input v-model="password" class="neo" type="password" placeholder="Mot de passe">
+                <input class="neo input" required v-model="email" type="mail" placeholder="Email">
+                <div class="formulaire__identifiant__password">
+                    <input class="neo input" required ref="inputPassword" v-model="password" type="password" placeholder="Mot de passe">
+                    <div class="formulaire__identifiant__password__eye">
+                        <div class="formulaire__identifiant__password__eye__icon" v-if="showPasswordIcon == false" @click="showPassword">
+                            <img class="formulaire__identifiant__password__eye__icon--close" src="../assets/eye-close.svg" alt="">
+                        </div>
+                        <div class="formulaire__identifiant__password__eye__icon" v-if="showPasswordIcon == true" @click="maskPassword">
+                            <img class="formulaire__identifiant__password__eye__icon--open" src="../assets/eye-open.svg" alt="">
+                        </div>
+                    </div>
+                </div>
 
                 <button v-if="mode == 'register'" @click.prevent="toRegister" class="neo formulaire__identifiant__submit" type="submit" value="S'inscrire">
                     <span v-if="status == 'loading'">Inscription en cours ...</span>
                     <span v-if="status == 'normal'">S'inscrire</span>
-                    <span v-if="status == 'loadingAfter'">Connexion en cours ...</span>
+                    <span v-if="status == 'create'">Votre compte à été crée !</span>
                 </button>
 
                 <button v-if="mode == 'connexion'" @click.prevent="toConnect" class="neo formulaire__identifiant__submit" type="submit" value="Se connecter">
                     <span v-if="status == 'loading'">Connexion en cours ...</span>
                     <span v-if="status == 'normal'">Se connecter</span>
                 </button>
+
+                <div v-if="mode == 'connexion'" class="formulaire__identifiant__auto">
+                    <input @change="longConnexion" class="neo formulaire__identifiant__auto__checkbox" name="autoConnect" id="autoConnect" type="checkbox">
+                    <label class="formulaire__identifiant__auto__label" for="autoConnect">Maintenir la connexion</label>
+                </div>
 
             </div>
 
@@ -48,17 +63,33 @@ export default {
 
   data: function(){
     return {
-      mode: "register",
+      mode: "connexion",
       status: 'normal',
       prenom: "",
       nom: "",
       email: "",
       password: "",
-      rep: ""
+      rep: "",
+      autoConnect: false,
+      showPasswordIcon: false
     }
   },
 
   methods: {
+    longConnexion: function(event){
+        this.autoConnect = event.target.checked
+    },
+
+    showPassword: function(){
+        this.$refs.inputPassword.type = "text"
+        this.showPasswordIcon = true
+    },
+
+    maskPassword: function(){
+        this.$refs.inputPassword.type = "password"
+        this.showPasswordIcon = false
+    },
+
     toConnect: function(){
 
         this.$axios.post('auth/login', {email: this.email, password: this.password})
@@ -67,9 +98,23 @@ export default {
             this.rep = ""
             this.status = 'loading'
 
-            var token = response.data.token 
-            this.$axios.defaults.headers.common["Authorization"] = "Bearer " + token;
-            
+            const userId = response.data.userId
+            const token = response.data.token
+            this.$axios.defaults.headers.common["Authorization"] = "Bearer " + token
+
+            localStorage.setItem("userId", userId)
+            localStorage.setItem("token", token)
+
+            if(this.autoConnect == true) {
+
+                localStorage.setItem("connexion", "auto")
+
+            } else {
+
+                localStorage.setItem("connexion", "manuel")
+
+            }
+
             setTimeout(function(){
                 this.$router.push({name: 'Actuality'})
             }.bind(this), 3000)
@@ -91,24 +136,14 @@ export default {
 
             setTimeout(function(){
 
-                this.status = 'normal'
+                this.status = 'create'
 
-                this.$axios.post('auth/login', {email: this.email, password: this.password})
-                .then((response) => {
+                setTimeout(function(){
 
-                    this.status = 'loadingAfter'
+                    this.status = 'normal'
+                    this.mode = "connexion"
 
-                    var token = response.data.token 
-                    this.$axios.defaults.headers.common["Authorization"] = "Bearer " + token;
-
-                    setTimeout(function(){
-                        this.$router.push({name: 'Actuality'})
-                    }.bind(this), 2000)
-
-                })
-                .catch( error => {
-                    this.rep = JSON.parse(error.request.response).message
-                })
+                }.bind(this), 2000)
 
             }.bind(this), 2000)
 
@@ -124,6 +159,10 @@ export default {
         this.email = ''
         this.password = ''
         this.rep = ''
+        this.nom = ""
+        this.prenom = ""
+        this.email = ""
+        this.password = ""
     },
 
     switchConnexion: function(){
@@ -132,7 +171,35 @@ export default {
         this.email = ''
         this.password = ''
         this.rep = ''
+        this.nom = ""
+        this.prenom = ""
+        this.email = ""
+        this.password = ""
     }
+  },
+
+  beforeCreate: function(){
+
+    const tokenLocal = localStorage.getItem("token")
+    const userIdLocal = localStorage.getItem("userId")
+    const modeConnexion = localStorage.getItem("connexion")
+
+    if (modeConnexion == "auto") {
+
+        this.$axios.post('/access', {token: tokenLocal, userId: userIdLocal})
+        .then(() => {
+            this.$router.push({name: "Actuality"})
+        })
+        .catch(() => {
+            localStorage.clear()
+        })
+        
+    } else {
+
+        localStorage.clear()
+
+    }
+
   },
 
   mounted: function(){
@@ -213,6 +280,28 @@ export default {
         &__identifiant{
             width: 100%;
 
+            &__password{
+                position: relative;
+
+                &__eye{
+                    position: absolute;
+                    top: 34%;
+                    right: 30px;
+
+                    &__icon{
+                        cursor: pointer;
+
+                        &--open{
+                            width: 25px;
+                        }
+
+                        &--close{
+                            width: 25px;
+                        }
+                    }
+                }
+            }
+
             &__submit{
                 background-color: #1b1d1f;
                 color: white;
@@ -223,9 +312,56 @@ export default {
                 }
             }
 
+            &__auto{
+                margin-top: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                &__label{
+                    font-size: 16px;
+                    color: black;
+                    font-weight: bold;
+                }
+
+                &__checkbox{
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 8px;
+                    appearance: none;
+                    -moz-appearance: none;
+                    -webkit-appearance: none;
+                    background-color: var(--color-secondary);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    transition: background-color 0.5s ease-in-out;
+                }
+
+                &__checkbox::after{
+                    font-family: "Font Awesome 5 Free";
+                    content: "\f00c";
+                    font-weight: bold;
+                    color: darken(#e0e0e0, 10%);
+                }
+
+                &__checkbox:hover{
+                    background-color: darken(#e0e0e0, 10%);
+                    color: black;
+                }
+
+                &__checkbox:hover::after{
+                    color: white;
+                }
+
+                &__checkbox:checked::after{
+                    color: black;
+                }
+            }
+
         }
        
-        input, button{
+        .input, button{
             width: 100%;
             margin-top: 10px;
             margin-bottom: 10px;
@@ -234,18 +370,13 @@ export default {
         }
     }
     
-    .error, .good{
+    .error{
         margin-top: 10px;
         font-size: 16px;
-        color: rgba(223, 0, 0, 0.849);
+        color: var(--color-error);
         font-weight: bold;
     }
 
-    .error{
-        color: rgba(223, 0, 0, 0.849);;
-    }
-    .good{
-        color: rgba(0, 206, 137, 0.849);
-    }
+    
 
 </style>

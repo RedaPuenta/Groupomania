@@ -32,9 +32,11 @@ export default {
 
 <style lang="scss" scoped>
 
+    @import "../sass/global.scss";
+
     .router-link-active{
         font-weight: bold;
-        font-size: 17px;
+        font-size: rem(17px);
     }
     .navbar{
         border-radius: 0px!important;

@@ -2,7 +2,9 @@
     <div class="mypost">
         <NavBar/>
         <Publication/>
-        <p>Je viens de la views MYPOST</p>
+        <div :class="{shadow: blur}">
+            <router-view></router-view>
+        </div>
     </div>
 </template>
 
@@ -14,10 +16,31 @@ export default {
     name: 'Mypost',
     components: {
         NavBar, Publication
+    },
+    data: function(){
+        return {
+            blur: false
+        }
+    },
+    methods: {
+         updateBlur: function(payload){
+            this.blur = payload.blur
+        },
+    },
+    beforeCreate: function(){
+        this.$store.dispatch('accessPage')
+    },
+    mounted: function(){
+        this.$store.dispatch('neo')
+    }, 
+    updated: function(){
+        this.$store.dispatch('neo')
     }
 }
 </script>
 
 <style lang="scss" scoped>
+
+@import "../sass/global.scss";
     
 </style>    

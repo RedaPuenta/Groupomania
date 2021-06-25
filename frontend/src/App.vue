@@ -6,30 +6,19 @@
 
 <script>
 export default {
-  
+  name: "App"
 }
 </script>
 
 <style lang="scss">
 
-/*******************************CSS GLOBAL**************************************/
-@function rem($size) {
-    @return $size / 16px * 1rem;
-}
-
-:root {
-  --color-primary: #6b7992;
-  --color-secondary: #e0e0e0;
-  --color-third: #f0f0f0;
-  --color-fourth: #cacaca;
-  --color-error: rgba(223, 0, 0, 0.849);
-}
+@import "./sass/global.scss";
 
 body{
-  background-color: var(--color-secondary);
-  font-family: 'Mulish', sans-serif;
-  font-size: 16px;
-  color: var(--color-primary);
+  background-color: $color-secondary;
+  font-family: $font-family;
+  font-size: (16px);
+  color: $color-primary;
 }
 
 *{
@@ -40,7 +29,13 @@ body{
   border: 0;
   line-height: 1;
   box-sizing: border-box;
-  font-family: 'Mulish', sans-serif;
+  font-size: (16px);
+  font-family: $font-family;
+}
+
+#app{
+  width: 100%;
+  height: 100%;
 }
 
 input, textarea, video {
@@ -48,20 +43,15 @@ input, textarea, video {
 }
 
 input{
-  background-color: var(--color-secondary);
+  background-color: $color-secondary;
 }
 
 .neo-press{
-    background: linear-gradient(145deg, var(--color-fourth), var(--color-third));
+    background: linear-gradient(145deg, $color-fourth, $color-third);
 }
 
 .neo-relax{
-    background: linear-gradient(145deg, var(--color-third), var(--color-fourth));
-}
-
-#app{
-  width: 100%;
-  height: 100%;
+    background: linear-gradient(145deg, $color-third, $color-fourth);
 }
 
 </style>

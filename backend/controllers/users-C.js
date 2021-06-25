@@ -10,7 +10,7 @@ exports.signup = (req, res, next) => {
     const userId = idGenerator.v1()
     const firstName = req.body.prenom
     const lastName = req.body.nom
-    const emailUser = cryptojs.HmacMD5(req.body.email, process.env.CRYPTOJS_SECRET).toString()
+    const emailUser = cryptojs.HmacMD5(req.body.email.toLowerCase(), process.env.CRYPTOJS_SECRET).toString()
     const passwordUser = req.body.password
     const avatar = `${req.protocol}://${req.get('host')}/media/avatar-empty.png`
     const bio = "Salut tout le monde !"
@@ -24,7 +24,7 @@ exports.signup = (req, res, next) => {
 
             function(error, results, fields){
 
-                if(results.affectedRows == 1){
+                if(error == null){
 
                     res.status(201).json({message: "Votre compte à été créé !"})   
 
@@ -43,7 +43,7 @@ exports.signup = (req, res, next) => {
 
 exports.login = (req, res, next) => {
 
-    const emailUser = cryptojs.HmacMD5(req.body.email, process.env.CRYPTOJS_SECRET).toString()
+    const emailUser = cryptojs.HmacMD5(req.body.email.toLowerCase(), process.env.CRYPTOJS_SECRET).toString()
     const passwordUser = req.body.password
 
     db.query(`SELECT password FROM user 
@@ -54,7 +54,7 @@ exports.login = (req, res, next) => {
         
             bcrypt.compare(passwordUser, results[0].password)    
             .then(valid => {
-                console.log(valid)
+                
                 if(valid === false){
 
                     res.status(401).json({message: "Le mot de passe est incorrect !"})
@@ -66,15 +66,22 @@ exports.login = (req, res, next) => {
                         [emailUser], 
 
                         function(error, results, fields) {
-                    
-                            res.status(200).json({
-                                userId: results[0].userId,
-                                token: jwt.sign({userId: results[0].userId}, process.env.JWT_SECRET, {expiresIn: 6 * 31 * 24 * 60 * 60})
-                            })
-                        
+
+                            if(error == null) {
+
+                                res.status(200).json({
+                                    userId: results[0].userId,
+                                    token: jwt.sign({userId: results[0].userId}, process.env.JWT_SECRET, {expiresIn: 6 * 31 * 24 * 60 * 60})
+                                })
+
+                            } else {
+
+                                res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
+
+                            }
+
                         }
                     )
-
                 }
 
             }) 

@@ -6,7 +6,8 @@ module.exports = (req, res, next) => {
 
     const emailUser = cryptojs.HmacMD5(req.body.email, process.env.CRYPTOJS_SECRET).toString()
 
-    db.query(`SELECT COUNT(email) AS exist FROM user 
+    db.query(`
+        SELECT COUNT(email) AS exist FROM user 
         WHERE email=?`, 
         [emailUser], 
         

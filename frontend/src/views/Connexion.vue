@@ -52,7 +52,12 @@
 
         </form>
 
-        <p class="error">{{rep}}</p>
+         <div class="error" v-if="errorAlert == true">
+            <div @click="quitError" class="error__icon">
+                <i class="error__icon--croix fas fa-times"></i>
+            </div>
+            <span class="error__text">{{errorText}}</span>
+        </div>
 
     </div>
 </template>
@@ -69,13 +74,20 @@ export default {
       nom: "",
       email: "",
       password: "",
-      rep: "",
+      errorText: "",
+      errorAlert: false,
       autoConnect: false,
       showPasswordIcon: false
     }
   },
 
   methods: {
+
+    quitError: function(){
+        this.errorAlert = false
+        this.errorText = ""
+    },
+
     longConnexion: function(event){
         this.autoConnect = event.target.checked
     },
@@ -94,8 +106,9 @@ export default {
 
         this.$axios.post('auth/login', {email: this.email, password: this.password})
         .then((response) => {
-
-            this.rep = ""
+            
+            this.errorAlert = false
+            this.errorText = ""
             this.status = 'loading'
 
             const userId = response.data.userId
@@ -121,7 +134,8 @@ export default {
             
         })
         .catch(error => {
-            this.rep = JSON.parse(error.request.response).message
+            this.errorAlert = true
+            this.errorText = JSON.parse(error.request.response).message
         })
 
     },
@@ -131,7 +145,8 @@ export default {
         this.$axios.post('auth/signup', {email: this.email, password: this.password, nom: this.nom, prenom: this.prenom})
         .then(() => {
 
-            this.rep = ""
+            this.errorAlert = false
+            this.errorText = ""
             this.status = 'loading'
 
             setTimeout(function(){
@@ -149,7 +164,8 @@ export default {
 
         })
         .catch(error => {
-            this.rep = JSON.parse(error.request.response).message
+            this.errorAlert = true
+            this.errorText = JSON.parse(error.request.response).message
         })
     },
 
@@ -158,7 +174,8 @@ export default {
         this.status = 'normal'
         this.email = ''
         this.password = ''
-        this.rep = ''
+        this.errorText = ''
+        this.errorAlert = false
         this.nom = ""
         this.prenom = ""
         this.email = ""
@@ -170,12 +187,14 @@ export default {
         this.status = 'normal'
         this.email = ''
         this.password = ''
-        this.rep = ''
+        this.errorText = ''
+        this.errorAlert = false
         this.nom = ""
         this.prenom = ""
         this.email = ""
         this.password = ""
     }
+    
   },
 
   beforeCreate: function(){
@@ -215,11 +234,17 @@ export default {
 
 <style lang="scss" scoped>
 
+    @import "../sass/global.scss";
+
     #connexion{
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+    }
+
+    .input:focus{
+       background-color: $color-third;
     }
 
     .logo{
@@ -235,9 +260,46 @@ export default {
 
     .titre{
         margin-top: 50px;
-        font-size: 40px;
+        font-size: rem(40px);
         color: black;
         font-weight: bold;
+    }
+
+    .input, button{
+        width: 100%;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        height: 50px;
+        text-align: center;
+        transition: background-color 0.7s ease-in-out;
+    }
+
+    .error{
+        margin-top: 10px;
+        font-size: rem(16px);
+        color: $color-error;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+
+        &__icon{
+            border-radius: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 23px;
+            width: 23px;
+            background-color: $color-error;
+            margin-right: 8px;
+            box-shadow: $box-shadow-button;
+            cursor: pointer;
+
+            &--croix{
+                color: white;
+            }
+        }
     }
 
     .question{
@@ -303,7 +365,7 @@ export default {
             }
 
             &__submit{
-                background-color: #1b1d1f;
+                background-color: $button-action;
                 color: white;
                 cursor: pointer;
 
@@ -319,7 +381,7 @@ export default {
                 align-items: center;
 
                 &__label{
-                    font-size: 16px;
+                    font-size: rem(16px);
                     color: black;
                     font-weight: bold;
                 }
@@ -331,7 +393,7 @@ export default {
                     appearance: none;
                     -moz-appearance: none;
                     -webkit-appearance: none;
-                    background-color: var(--color-secondary);
+                    background-color: $color-secondary;
                     display: flex;
                     justify-content: center;
                     align-items: center;
@@ -342,11 +404,11 @@ export default {
                     font-family: "Font Awesome 5 Free";
                     content: "\f00c";
                     font-weight: bold;
-                    color: darken(#e0e0e0, 10%);
+                    color: darken($color-secondary, 10%);
                 }
 
                 &__checkbox:hover{
-                    background-color: darken(#e0e0e0, 10%);
+                    background-color: darken($color-secondary, 10%);
                     color: black;
                 }
 
@@ -360,23 +422,6 @@ export default {
             }
 
         }
-       
-        .input, button{
-            width: 100%;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            height: 50px;
-            text-align: center;
-        }
     }
     
-    .error{
-        margin-top: 10px;
-        font-size: 16px;
-        color: var(--color-error);
-        font-weight: bold;
-    }
-
-    
-
 </style>

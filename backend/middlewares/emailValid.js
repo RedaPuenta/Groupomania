@@ -1,7 +1,7 @@
 module.exports = (req, res, next) => {
 
     const emailReq = req.body.email
-    const regexEmail = new RegExp('^[a-z0-9._%+-]{2,}[@]{1}[a-z0-9.-]{2,}[.]{1}[a-z]{2,3}$', 'g')
+    const regexEmail = new RegExp('^[a-zA-Z0-9._%+-]{2,}[@]{1}[a-zA-Z0-9.-]{2,}[.]{1}[a-zA-Z]{2,3}$', 'g')
 
     if(emailReq.match(regexEmail)) {
 

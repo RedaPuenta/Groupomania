@@ -9,6 +9,7 @@
                     <img v-if="fileExe == false" class="media__post__write__view__default" src="../assets/upload.png" alt="Image de téléchargement"/>
                     <img v-if="fileExe == true && fileExeType == 'image'" class="media__post__write__view__file" ref="mediaImage" src="#" alt="Votre fichier"/>
                     <video v-if="fileExe == true && fileExeType == 'video'" class="media__post__write__view__file" ref="mediaVideo" autoplay muted loop src="#"></video>
+                    <img v-if="fileExe == true && fileExeType == 'loading'" class="media__post__write__view__file" src="../assets/loading.gif" alt="Votre fichier"/>
                 </div>
                 <div class="media__post__write__control">
                     <div v-if="upload == false" class="media__post__write__control__upload"> 
@@ -20,6 +21,9 @@
                 <textarea v-model="legend" class="media__post__write__publication" name="legend" rows="3" placeholder="Ecrivez votre légende ..."></textarea>
                 <button class="media__post__write__submit" type="submit">{{textButton}}</button>
                 <div class="media__post__write__error" v-if="errorAlert == true">
+                    <div @click="quitError" class="media__post__write__error__icon">
+                        <i class="media__post__write__error__icon--croix fas fa-times"></i>
+                    </div>
                     <span class="media__post__write__error__text">{{errorText}}</span>
                 </div>
             </form>
@@ -45,6 +49,11 @@ export default {
     },
     methods: {
 
+        quitError: function(){
+            this.errorAlert = false
+            this.errorText = ""
+        },
+
         toWrite: function(){
             this.new_write = true
             this.textButton = "Publier"
@@ -52,7 +61,8 @@ export default {
             this.errorText = ""
             this.upload = false
             this.fileExe = false
-            this.file =""
+            this.file = ""
+            this.legend = ""
             this.$emit('blur-control', {blur: true})
         },
 
@@ -64,6 +74,7 @@ export default {
             this.upload = false
             this.fileExe = false
             this.file = ""
+            this.legend = ""
             this.$emit('blur-control', {blur: false})
         },
 
@@ -125,7 +136,7 @@ export default {
                 formData.append('legend', this.legend)
                 formData.append('userId', userId)
 
-                this.$axios.post('publication', formData, 
+                this.$axios.post('multimedia/create', formData, 
                 {
                     headers: {
                         'Content-Type': 'multipart/form-data'
@@ -135,7 +146,7 @@ export default {
 
                     this.errorAlert = false
                     this.errorText = ""
-                    this.fileExeType = ""
+                    this.fileExeType = "loading"
                     this.textButton = "Votre publication est en cours d'enrengistrement ..." 
 
                     setTimeout(function(){
@@ -182,9 +193,7 @@ export default {
 
 <style lang="scss" scoped>
 
-    $box-shadow-image: inset 2px 2px 9px rgb(92, 92, 92);
-    $box-shadow-inner: inset 1px 1px 6px rgb(136, 136, 136);
-    $box-shadow-button: 1px 1px 6px rgb(136, 136, 136);
+    @import "../sass/global.scss";
 
     .media{ 
         width: 100%;
@@ -280,8 +289,8 @@ export default {
                         border-radius: 10px;
                         width: 130px;
                         height: 30px;
-                        font-size: 12px;
-                        background-color: black;
+                        font-size: rem(12px);
+                        background-color: $button-action;
                         color: white;
                         box-shadow: $box-shadow-button;
                         overflow: hidden;
@@ -300,13 +309,13 @@ export default {
                             cursor: pointer;
                             width: 100%;
                             height: 100%;
-                            background-color: black;
+                            background-color: $button-action;
                             position: absolute;
                             top: 0;
                             left: 0;
                             right: 0;
                             bottom: 0;
-                            font-size: 12px;
+                            font-size: rem(12px);
                             display: flex;
                             justify-content: center;
                             align-items: center;
@@ -323,7 +332,7 @@ export default {
                     resize: none;
                     width: 100%;
                     padding: 10px 10px;
-                    background-color: var(--color-third);
+                    background-color: $color-third;
                     text-align: center;
                     box-shadow: $box-shadow-inner;
                 }
@@ -332,7 +341,7 @@ export default {
                     margin-top: 10px;
                     width: 100%;
                     height: 40px;
-                    background-color: black;
+                    background-color: $button-action;
                     color: white;
                     cursor: pointer;
                     border-radius: 20px!important;
@@ -343,14 +352,27 @@ export default {
                     margin-top: 10px;
                     padding: 5px;
                     font-weight: bold;
-                    color: var(--color-error);
+                    color: $color-error;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-align: center;
 
                     &__icon{
-                        margin: 0 8px;
+                        border-radius: 100%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 23px;
+                        width: 23px;
+                        background-color: $color-error;
+                        margin-right: 8px;
+                        box-shadow: $box-shadow-button;
+                        cursor: pointer;
+
+                        &--croix{
+                            color: white;
+                        }
                     }
 
                 }

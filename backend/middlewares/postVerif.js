@@ -3,7 +3,7 @@ const fs = require("fs")
 module.exports = (req, res, next) => {
 
     const legend = req.body.legend
-    const regexAntiInjection = /[<=>)(}{:;#_|+^*~$"]/
+    const regexAntiInjection = /[<>}{;_|^*~$]/
     
     function deleteImage() {
         if(req.file) {
@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
         }  
     }
     
-    if(legend == ""){
+    if(legend == ""  || !/[a-z]/.test(legend)){
 
         res.status(400).json({message: "Vous avez oublié de renseigner une légende"})
 
@@ -21,7 +21,7 @@ module.exports = (req, res, next) => {
 
         deleteImage()
 
-        res.status(400).json({message: "Certains caractères contenu dans la légende ne sont pas acceptables"})
+        res.status(400).json({message: "Certains caractères contenu dans votre légende ne sont pas acceptables"})
     
     } else if (!req.file) {
 

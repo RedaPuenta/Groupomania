@@ -8,23 +8,79 @@ import Favory from '../views/Favory.vue'
 import Friends from '../views/Friends.vue'
 import Account from '../views/Account.vue'
 
+import Multimedia from '../components/Multimedia.vue'
+import IDMultimedia from '../components/IDMultimedia.vue'
+
+import Agora from '../components/Agora.vue'
+import IDAgora from '../components/IDAgora.vue'
+
 Vue.use(VueRouter)
 
 const routes = [
+  {
+    path: '*',
+    redirect: "/Actuality"
+  },
   {
     path: '/',
     name: 'Connexion', 
     component: Connexion
   },
   {
+    redirect: '/Actuality/Multimedia',
     path: '/Actuality',
     name: 'Actuality',
-    component: Actuality
+    component: Actuality,
+    children: [
+      {
+        path: 'Multimedia',
+        name: "Multimedia",
+        component: Multimedia,
+      },
+      {
+        path: "Multimedia/:id",
+        name: "IDMultimedia",
+        component: IDMultimedia
+      },
+      {
+        path: "Agora",
+        name: "Agora",
+        component: Agora,
+      },
+      {
+        path: "Agora/:id",
+        name: "IDAgora",
+        component: IDAgora
+      }
+    ]
   },
   {
+    redirect: '/Mypost/Multimedia',
     path: '/Mypost',
     name: 'Mypost', 
-    component: Mypost
+    component: Mypost,
+    children: [
+      {
+        path: 'Multimedia',
+        name: "Multimedia",
+        component: Multimedia,
+      },
+      {
+        path: "Multimedia/:id",
+        name: "IDMultimedia",
+        component: IDMultimedia
+      },
+      {
+        path: "Agora",
+        name: "Agora",
+        component: Agora,
+      },
+      {
+        path: "Agora/:id",
+        name: "IDAgora",
+        component: IDAgora
+      }
+    ]
   },
   {
     path: '/Favory',

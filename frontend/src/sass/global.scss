@@ -1,0 +1,19 @@
+@function rem($size) {
+    @return $size / 16px * 1rem;
+}
+
+$color-primary: #6b7992;
+$color-secondary: #e0e0e0;
+$color-third: #f0f0f0;
+$color-fourth: #cacaca;
+$color-error: rgba(223, 0, 0, 0.849);
+
+$box-shadow-image: inset 2px 2px 9px rgb(92, 92, 92);
+$box-shadow-inner: inset 1px 1px 6px rgb(136, 136, 136);
+$box-shadow-button: 1px 1px 6px rgb(136, 136, 136);
+
+$font-family: 'Mulish', sans-serif;
+
+$button-action: black;
+$button-action-true: rgb(0, 255, 0);
+$button-action-false: rgb(255, 255, 255);

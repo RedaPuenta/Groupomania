@@ -9,8 +9,8 @@ exports.create = (req, res, next) => {
     const legend = req.body.legend
 
     db.query(`
-        INSERT INTO post (userId, postId, media, legend, datePost) 
-        VALUES(?, ?, ?, ?, NOW())`, 
+        INSERT INTO post (userId, postId, media, legend, type, datePost) 
+        VALUES(?, ?, ?, ?, "media", NOW())`, 
         [userId, postId, media, legend], 
 
         function(error, results, fields){

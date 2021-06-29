@@ -35,13 +35,14 @@ export default new Vuex.Store({
 
     accessPage: function(){
   
-      const token = localStorage.getItem("token")
       const userId = localStorage.getItem("userId")
 
-      if (token !== null && userId !== null) {
+      if (userId !== null) {
 
-        axios.post('http://localhost:3000/api/access', {token: token, userId: userId})
-        .then(() => {})
+        axios.post('http://localhost:3000/api/access', {userId: userId})
+        .then(() => {
+
+        })
         .catch(() => {
           router.push({name: 'Connexion'})
         })

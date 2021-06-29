@@ -5,9 +5,10 @@ const app = express()
 const path = require("path")
 const helmet = require("helmet")
 
-const userRoutes = require("./routes/user-R")
+const accountRoutes = require("./routes/account-R")
 const multimediaRoutes = require("./routes/multimedia-R")
 const accessRoutes = require("./routes/access-R")
+const userRoutes = require("./routes/user-R")
 
 app.use(helmet())
 
@@ -22,8 +23,9 @@ app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 
 app.use('/media', express.static(path.join(__dirname, 'media')))
-app.use("/api/auth", userRoutes)
+app.use("/api/auth", accountRoutes)
 app.use("/api/multimedia", multimediaRoutes)
 app.use("/api/access", accessRoutes)
+app.use("/api/user", userRoutes)
 
 module.exports = app

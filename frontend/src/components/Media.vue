@@ -198,7 +198,7 @@ export default {
         this.$axios.post(`/multimedia/${this.api}`, {userId: userId, postId: postId})
         .then((response) => {
             this.data = response.data
-
+            console.log(response.data)
             if(this.focus === true) {
                 this.big = true
             } else {
@@ -622,7 +622,7 @@ export default {
                 width: 100%;
                 display: flex;
                 justify-content: center;
-                align-items: center;
+                align-items: flex-end;
                 
                 &__button{
                     cursor: pointer;
@@ -632,7 +632,6 @@ export default {
                     color: $button-action-false;
                     font-size: rem(12px);
                     box-shadow: $box-shadow-button;
-                    margin-bottom: 10px;
                 }
             }
         }

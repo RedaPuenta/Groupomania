@@ -199,13 +199,12 @@ export default {
 
   beforeCreate: function(){
 
-    const tokenLocal = localStorage.getItem("token")
     const userIdLocal = localStorage.getItem("userId")
     const modeConnexion = localStorage.getItem("connexion")
 
     if (modeConnexion == "auto") {
 
-        this.$axios.post('/access', {token: tokenLocal, userId: userIdLocal})
+        this.$axios.post('/access', {userId: userIdLocal})
         .then(() => {
             this.$router.push({name: "Actuality"})
         })

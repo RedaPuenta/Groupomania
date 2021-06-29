@@ -4,8 +4,6 @@
         <div class="navbar__explorer">
             <ul class="navbar__explorer__list">
                 <li><router-link to="/Actuality">Fil d'actualité</router-link></li>
-                <li><router-link to="/Mypost">Mes posts</router-link></li>
-                <li><router-link to="/Favory">Mes favories</router-link></li>
                 <li><router-link to="/Friends">Mes collègues</router-link></li>
             </ul>
         </div>

@@ -5,9 +5,9 @@ module.exports = (req, res, next) => {
 
     try {
 
-        if (req.body.token && req.body.userId) {
+        if (req.headers.authorization && req.body.userId) {
 
-            const tokenClient = req.body.token
+            const tokenClient = req.headers.authorization.split(" ")[1]
             const userIdClient = req.body.userId
             const decodedToken = jwt.verify(tokenClient, process.env.JWT_SECRET)
             const userIdDecoded = decodedToken.userId

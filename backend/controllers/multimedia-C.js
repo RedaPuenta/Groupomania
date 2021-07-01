@@ -5,7 +5,7 @@ exports.create = (req, res, next) => {
 
     const userId = req.body.userId
     const postId = idGenerator.v1()
-    const media = `${req.protocol}://${req.get('host')}/media/${req.file.filename}`
+    const media = req.file.filename
     const legend = req.body.legend
 
     db.query(`
@@ -90,6 +90,7 @@ exports.recover = (req, res, next) => {
 
                         function(error, comments, fields){
 
+                            results[i].media = `${req.protocol}://${req.get('host')}/media/${results[i].media}`
                             results[i].commentsList = comments
                             new_results.push(results[i])
 
@@ -164,6 +165,7 @@ exports.recoverOne = (req, res, next) => {
 
                         if(error == null) {
 
+                            results[0].media = `${req.protocol}://${req.get('host')}/media/${results[0].media}`
                             results[0].commentsList = comments
                             res.status(200).json(results)
 

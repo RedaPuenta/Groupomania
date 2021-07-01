@@ -2,9 +2,10 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 import Connexion from '../views/Connexion.vue'
+import Info from '../views/Info.vue'
+import Profil from '../views/Profil.vue'
 import Actuality from '../views/Actuality.vue'
 import Friends from '../views/Friends.vue'
-import Account from '../views/Account.vue'
 
 import Multimedia from '../components/Multimedia.vue'
 import IDMultimedia from '../components/IDMultimedia.vue'
@@ -23,6 +24,16 @@ const routes = [
     path: '/',
     name: 'Connexion', 
     component: Connexion
+  },
+  {
+    path: "/Info",
+    name: "Info",
+    component: Info
+  },
+  {
+    path: "/Profil/:id",
+    name: "Profil",
+    component: Profil
   },
   {
     redirect: '/Actuality/Multimedia',
@@ -56,11 +67,6 @@ const routes = [
     path: '/Friends',
     name: 'Friends', 
     component: Friends
-  },
-  {
-    path: '/Account',
-    name: 'Account',
-    component: Account
   }
 ]
 

@@ -38,6 +38,11 @@ body{
   height: 100%;
 }
 
+a:active{
+  color: $color-primary;
+}
+
+
 input, textarea, video {
   outline: none;
 }

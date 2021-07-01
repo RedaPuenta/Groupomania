@@ -3,8 +3,8 @@ const cryptojs = require("crypto-js")
 const db = require("../mysql/connectDB")
 
 module.exports = (req, res, next) => {
-
-    const emailUser = cryptojs.HmacMD5(req.body.email, process.env.CRYPTOJS_SECRET).toString()
+    
+    const emailUser = cryptojs.HmacMD5(req.body.email.toLowerCase(), process.env.CRYPTOJS_SECRET).toString()
 
     db.query(`
         SELECT COUNT(email) AS exist FROM user 

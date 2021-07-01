@@ -78,11 +78,8 @@
                 </button>
             </form>
 
-            <div v-if="focus == true && errorAlert == true" @click="quitError" class="media__error">
-                <div class="media__error__icon">
-                    <i class="media__error__icon--croix fas fa-times"></i>
-                </div>
-                <span class="media__error__text">{{errorText}}</span>
+            <div v-if="focus == true" class="media__error">
+                <Error/>
             </div>  
 
         </div>
@@ -90,18 +87,20 @@
 </template>
 
 <script>
+import Error from './Error.vue'
 
 export default {
     name: 'Media',
+    components: {
+        Error
+    },
     data: function(){
         return{
             data: {},
             position: -1,
             small: false,
             big: false,
-            comments: "",
-            errorAlert: false,
-            errorText: ""
+            comments: ""
         }
     },
     props: {
@@ -111,11 +110,6 @@ export default {
 
     },
     methods: {
-
-        quitError: function(){
-            this.errorAlert = false
-            this.errorText = ""
-        },
         
         likePost: function(event){
 
@@ -147,8 +141,7 @@ export default {
         },
 
         commentPost: function(){
-            this.errorAlert = false
-            this.errorText = ""
+            this.$store.commit("DESACTIVE_ERROR")
 
             const postId = this.$route.params.id
             const userId = localStorage.getItem("userId")
@@ -161,17 +154,13 @@ export default {
 
             })
             .catch((error) => {
-            
-                this.errorAlert = true
-                this.errorText = JSON.parse(error.request.response).message
-
+                this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)
             })
         },
 
         deleteComments: function(event){
 
-            this.errorAlert = false
-            this.errorText = ""
+            this.$store.commit("DESACTIVE_ERROR")
 
             const userId = localStorage.getItem("userId")
             const commentsId = event.target.parentElement.parentElement.parentElement.dataset.commentsid
@@ -182,9 +171,7 @@ export default {
                 document.location.reload()
             })
             .catch((error) => {
-
-                this.errorAlert = true
-                this.errorText = JSON.parse(error.request.response).message
+                this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)
             })
         }
     
@@ -198,7 +185,7 @@ export default {
         this.$axios.post(`/multimedia/${this.api}`, {userId: userId, postId: postId})
         .then((response) => {
             this.data = response.data
-            console.log(response.data)
+            
             if(this.focus === true) {
                 this.big = true
             } else {
@@ -665,31 +652,6 @@ export default {
 
         &__error{
             margin-top: 10px;
-            padding: 5px;
-            font-weight: bold;
-            color: $color-error;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-
-            &__icon{
-                border-radius: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 23px;
-                width: 23px;
-                background-color: $color-error;
-                margin-right: 8px;
-                box-shadow: $box-shadow-button;
-                cursor: pointer;
-
-            &--croix{
-                color: white;
-            }
-          }
         }
     }
 

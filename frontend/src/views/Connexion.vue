@@ -52,41 +52,34 @@
 
         </form>
 
-         <div class="error" v-if="errorAlert == true">
-            <div @click="quitError" class="error__icon">
-                <i class="error__icon--croix fas fa-times"></i>
-            </div>
-            <span class="error__text">{{errorText}}</span>
-        </div>
+        <Error/>
 
     </div>
 </template>
 
-<script>
-export default {
-  name: 'Home',
 
-  data: function(){
-    return {
-      mode: "connexion",
-      status: 'normal',
-      prenom: "",
-      nom: "",
-      email: "",
-      password: "",
-      errorText: "",
-      errorAlert: false,
-      autoConnect: false,
-      showPasswordIcon: false
-    }
-  },
+<script>
+import Error from '@/components/Error.vue'
+
+export default {
+    name: 'Home',
+    components: {
+        Error
+    },
+    data: function(){
+        return {
+        mode: "connexion",
+        status: 'normal',
+        prenom: "",
+        nom: "",
+        email: "",
+        password: "",
+        autoConnect: false,
+        showPasswordIcon: false
+        }
+    },
 
   methods: {
-
-    quitError: function(){
-        this.errorAlert = false
-        this.errorText = ""
-    },
 
     longConnexion: function(event){
         this.autoConnect = event.target.checked
@@ -107,12 +100,13 @@ export default {
         this.$axios.post('auth/login', {email: this.email, password: this.password})
         .then((response) => {
             
-            this.errorAlert = false
-            this.errorText = ""
+            this.$store.commit("DESACTIVE_ERROR")
             this.status = 'loading'
 
             const userId = response.data.userId
             const token = response.data.token
+            const firstConnection = response.data.firstConnection
+
             this.$axios.defaults.headers.common["Authorization"] = "Bearer " + token
 
             localStorage.setItem("userId", userId)
@@ -129,13 +123,21 @@ export default {
             }
 
             setTimeout(function(){
-                this.$router.push({name: 'Actuality'})
+
+                if(firstConnection == 0) {
+
+                    this.$router.push({name: 'Info'})
+
+                } else {
+
+                    this.$router.push({name: 'Actuality'})
+                }
+
             }.bind(this), 3000)
             
         })
         .catch(error => {
-            this.errorAlert = true
-            this.errorText = JSON.parse(error.request.response).message
+            this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)
         })
 
     },
@@ -145,8 +147,7 @@ export default {
         this.$axios.post('auth/signup', {email: this.email, password: this.password, nom: this.nom, prenom: this.prenom})
         .then(() => {
 
-            this.errorAlert = false
-            this.errorText = ""
+            this.$store.commit("DESACTIVE_ERROR")
             this.status = 'loading'
 
             setTimeout(function(){
@@ -164,18 +165,16 @@ export default {
 
         })
         .catch(error => {
-            this.errorAlert = true
-            this.errorText = JSON.parse(error.request.response).message
+            this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)
         })
     },
 
     switchRegister: function(){
+        this.$store.commit("DESACTIVE_ERROR")
         this.mode = 'register'
         this.status = 'normal'
         this.email = ''
         this.password = ''
-        this.errorText = ''
-        this.errorAlert = false
         this.nom = ""
         this.prenom = ""
         this.email = ""
@@ -183,12 +182,11 @@ export default {
     },
 
     switchConnexion: function(){
+        this.$store.commit("DESACTIVE_ERROR")
         this.mode = 'connexion'
         this.status = 'normal'
         this.email = ''
         this.password = ''
-        this.errorText = ''
-        this.errorAlert = false
         this.nom = ""
         this.prenom = ""
         this.email = ""
@@ -271,34 +269,6 @@ export default {
         height: 50px;
         text-align: center;
         transition: background-color 0.7s ease-in-out;
-    }
-
-    .error{
-        margin-top: 10px;
-        font-size: rem(16px);
-        color: $color-error;
-        font-weight: bold;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-
-        &__icon{
-            border-radius: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 23px;
-            width: 23px;
-            background-color: $color-error;
-            margin-right: 8px;
-            box-shadow: $box-shadow-button;
-            cursor: pointer;
-
-            &--croix{
-                color: white;
-            }
-        }
     }
 
     .question{

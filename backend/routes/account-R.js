@@ -10,6 +10,7 @@ const emailUseSignUp = require("../middlewares/emailUseSignUp")
 
 router.post("/signup", nameVerif, emailUseSignUp, emailValid, passwordValid, userController.signup)
 router.post("/login", emailUseLogin, userController.login)
+router.post("/access", userController.access)
 
 // On exporte router EXPRESS pour que l'application EXPRESS puisse s'en servir
 module.exports = router

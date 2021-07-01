@@ -17,3 +17,12 @@ $font-family: 'Mulish', sans-serif;
 $button-action: black;
 $button-action-true: rgb(0, 255, 0);
 $button-action-false: rgb(255, 255, 255);
+
+@mixin gravure {
+    text-shadow: 
+    1px 1px white, 
+    -1px -1px black;
+    color: darken($color-secondary, 15);
+}
+
+

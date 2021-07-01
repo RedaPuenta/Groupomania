@@ -1,8 +1,8 @@
 <template>
     <div class="friends">
-        <NavBar/>
+        <NavBar mode= 'accueil' class="friends__navbar"/>
         <div class="friends__list">
-            <div v-for="(item, index) in user" :key="index" class="neo neo-relax friends__list__user">
+            <router-link v-for="(item, index) in user" :key="index" :to="{name: 'Profil', params: {id: item.userId}}" class="neo neo-relax friends__list__user">
                 <div>
                     <div class="friends__list__user__image">
                         <div class="friends__list__user__image__shadow"></div>
@@ -37,7 +37,7 @@
                         <span>Agora</span>
                     </div>
                 </div>
-            </div>
+            </router-link>
         </div>
     </div>
 </template>
@@ -61,7 +61,9 @@ export default {
     mounted: function(){
         this.$store.dispatch('neo')
 
-        this.$axios.post('user/recover')
+        const userId = localStorage.getItem("userId")
+
+        this.$axios.get(`user/friends/${userId}`)
         .then((response) => {
             this.user = response.data
         })  
@@ -86,16 +88,23 @@ export default {
 
     .friends{ 
 
+        &__navbar{
+            position: relative;
+            z-index: 2;
+        }
+
         &__list{
             margin-top: 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: relative;
+            z-index: 1;
 
             &__user{
                 width: 70%;
-                height: 150px;
+                height: 180px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -143,19 +152,17 @@ export default {
                         align-items: center;
 
                         &__cache{
-                            margin: 30px 0 20px 0;
-                            border-radius: 10px!important;
-                            background-color: black;
+                            margin: 30px 0 30px 0;
                             display: flex;
                             justify-content: center;
                             align-items: center;
                     
                             span{
-                                font-weight: bold;
-                                text-shadow: 0px 0px 8px rgb(255, 255, 255);
-                                color: rgb(255, 255, 255);
+                                font-weight: 900;
                                 padding: 10px;
-                                font-size: rem(19px);
+                                letter-spacing: 2px;
+                                font-size: rem(30px);
+                                @include gravure();
                             }
                         }
 
@@ -244,6 +251,10 @@ export default {
                                 box-shadow: $box-shadow-image;
                                 background: center / 135%  no-repeat url("../assets/glass.png");
                             }
+                        }
+
+                        span{
+                            color: black;
                         }
                     }
                 }

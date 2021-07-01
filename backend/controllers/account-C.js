@@ -8,11 +8,11 @@ const db = require("../mysql/connectDB")
 exports.signup = (req, res, next) => {
 
     const userId = idGenerator.v1()
-    const firstName = req.body.prenom
-    const lastName = req.body.nom
+    const firstName = req.body.prenom.charAt(0).toUpperCase() + req.body.prenom.slice(1).toLowerCase()
+    const lastName = req.body.nom.charAt(0).toUpperCase() + req.body.nom.slice(1).toLowerCase()
     const emailUser = cryptojs.HmacMD5(req.body.email.toLowerCase(), process.env.CRYPTOJS_SECRET).toString()
     const passwordUser = req.body.password
-    const avatar = `${req.protocol}://${req.get('host')}/media/avatar-empty.png`
+    const avatar = `${req.protocol}://${req.get('host')}/media/avatar/default.png`
     const bio = "Salut tout le monde !"
 
     bcrypt.hash(passwordUser, 10)
@@ -42,7 +42,7 @@ exports.signup = (req, res, next) => {
 }
 
 exports.login = (req, res, next) => {
-
+    
     const emailUser = cryptojs.HmacMD5(req.body.email.toLowerCase(), process.env.CRYPTOJS_SECRET).toString()
     const passwordUser = req.body.password
 
@@ -61,7 +61,7 @@ exports.login = (req, res, next) => {
 
                 } else {
 
-                    db.query(`SELECT userId FROM user 
+                    db.query(`SELECT userId, firstConnection FROM user 
                         WHERE email=?`, 
                         [emailUser], 
 
@@ -71,7 +71,8 @@ exports.login = (req, res, next) => {
 
                                 res.status(200).json({
                                     userId: results[0].userId,
-                                    token: jwt.sign({userId: results[0].userId}, process.env.JWT_SECRET, {expiresIn: 6 * 31 * 24 * 60 * 60})
+                                    token: jwt.sign({userId: results[0].userId}, process.env.JWT_SECRET, {expiresIn: 6 * 31 * 24 * 60 * 60}),
+                                    firstConnection: results[0].firstConnection
                                 })
 
                             } else {
@@ -89,4 +90,40 @@ exports.login = (req, res, next) => {
 
         }
     )    
+}
+
+exports.access = (req, res, next) => {
+
+    try {
+
+        if (req.headers.authorization && req.body.userId) {
+
+            const tokenClient = req.headers.authorization.split(" ")[1]
+            const userIdClient = req.body.userId
+            const decodedToken = jwt.verify(tokenClient, process.env.JWT_SECRET)
+            const userIdDecoded = decodedToken.userId
+
+            if (userIdClient !== userIdDecoded){
+
+                res.status(498).json({message: "Le token a expiré"})
+            
+            } else {
+
+                res.status(200).json({message: "L'accès est autorisé"})
+
+            }
+
+        } else {
+
+            res.status(401).json({message: "L'accès n'est pas autorisé"})
+
+        }
+
+
+    } catch {
+
+        res.status(498).json({message: "Le token est invalide"})
+
+    }
+
 }

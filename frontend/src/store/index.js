@@ -7,15 +7,25 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    errorAlert: false,
+    errorText: ""
   },
   getters: {
   },
   mutations: {
-  
+
+    DESACTIVE_ERROR: function(state){
+      state.errorAlert = false
+      state.errorText = ""
+    },
+
+    ACTIVE_ERROR: function(state, text){
+      state.errorAlert = true
+      state.errorText = text
+    }
   },
   actions: {
     neo: function(){
-
       let neo = document.querySelectorAll(".neo")
       for (let i= 0; i < neo.length; i++) {
         let color1 = "#bebebe"
@@ -39,7 +49,7 @@ export default new Vuex.Store({
 
       if (userId !== null) {
 
-        axios.post('http://localhost:3000/api/access', {userId: userId})
+        axios.post('/auth/access', {userId: userId})
         .then(() => {
 
         })

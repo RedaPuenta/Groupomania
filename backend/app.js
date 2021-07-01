@@ -7,8 +7,8 @@ const helmet = require("helmet")
 
 const accountRoutes = require("./routes/account-R")
 const multimediaRoutes = require("./routes/multimedia-R")
-const accessRoutes = require("./routes/access-R")
 const userRoutes = require("./routes/user-R")
+const assetRoutes = require("./routes/asset-R")
 
 app.use(helmet())
 
@@ -25,7 +25,7 @@ app.use(express.json())
 app.use('/media', express.static(path.join(__dirname, 'media')))
 app.use("/api/auth", accountRoutes)
 app.use("/api/multimedia", multimediaRoutes)
-app.use("/api/access", accessRoutes)
 app.use("/api/user", userRoutes)
+app.use("/api/asset", assetRoutes)
 
 module.exports = app

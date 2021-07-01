@@ -20,11 +20,8 @@
                 </div>
                 <textarea v-model="legend" class="media__post__write__publication" name="legend" rows="3" placeholder="Ecrivez votre légende ..."></textarea>
                 <button class="media__post__write__submit" type="submit">{{textButton}}</button>
-                <div class="media__post__write__error" v-if="errorAlert == true">
-                    <div @click="quitError" class="media__post__write__error__icon">
-                        <i class="media__post__write__error__icon--croix fas fa-times"></i>
-                    </div>
-                    <span class="media__post__write__error__text">{{errorText}}</span>
+                <div class="media__post__write__error">
+                    <Error/>
                 </div>
             </form>
         </div>
@@ -32,15 +29,18 @@
 </template>
 
 <script>
+import Error from './Error.vue'
+
 export default {
     name: "Media",
+    components: {
+        Error
+    },
     data: function(){
         return{
             new_write: false,
             file: "",
             legend: "",
-            errorAlert: false,
-            errorText: "",
             textButton: "Publier",
             upload: false,
             fileExe: false,
@@ -49,16 +49,10 @@ export default {
     },
     methods: {
 
-        quitError: function(){
-            this.errorAlert = false
-            this.errorText = ""
-        },
-
         toWrite: function(){
+            this.$store.commit("DESACTIVE_ERROR")
             this.new_write = true
             this.textButton = "Publier"
-            this.errorAlert = false
-            this.errorText = ""
             this.upload = false
             this.fileExe = false
             this.file = ""
@@ -67,10 +61,9 @@ export default {
         },
 
         toExit: function(){
+            this.$store.commit("DESACTIVE_ERROR")
             this.new_write = false
             this.textButton = "Publier"
-            this.errorAlert = false
-            this.errorText = ""
             this.upload = false
             this.fileExe = false
             this.file = ""
@@ -84,13 +77,11 @@ export default {
 
             if(typeValid.indexOf(event.target.files[0].type) == -1) {
 
-                this.errorAlert = true
-                this.errorText = "Le format du fichier n'est pas autorisé"
+                await this.$store.commit("ACTIVE_ERROR", "Le format du fichier n'est pas autorisé")
 
             } else { 
                 
-                this.errorAlert = await false
-                this.errorText = await ""
+                await this.$store.commit("DESACTIVE_ERROR")
                 this.fileExe = await true
 
                 if (typeValid.indexOf(event.target.files[0].type) < 4) {
@@ -144,8 +135,7 @@ export default {
                 })
                 .then((response) => {
 
-                    this.errorAlert = false
-                    this.errorText = ""
+                    this.$store.commit("DESACTIVE_ERROR")
                     this.fileExeType = "loading"
                     this.textButton = "Votre publication est en cours d'enrengistrement ..." 
 
@@ -167,9 +157,7 @@ export default {
 
                 })  
                 .catch((error) => {
-                    this.errorAlert = true
-                    console.log(error)
-                    this.errorText = JSON.parse(error.request.response).message
+                    this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)
                 })
 
             } else {
@@ -350,31 +338,6 @@ export default {
 
                 &__error{
                     margin-top: 10px;
-                    padding: 5px;
-                    font-weight: bold;
-                    color: $color-error;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-align: center;
-
-                    &__icon{
-                        border-radius: 100%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 23px;
-                        width: 23px;
-                        background-color: $color-error;
-                        margin-right: 8px;
-                        box-shadow: $box-shadow-button;
-                        cursor: pointer;
-
-                        &--croix{
-                            color: white;
-                        }
-                    }
-
                 }
             }
         }

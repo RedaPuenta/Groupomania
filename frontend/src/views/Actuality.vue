@@ -1,6 +1,6 @@
 <template>
     <div class="actuality">
-        <NavBar/>
+        <NavBar mode='accueil'/>
         <Publication @blur-control="updateBlur"/>
         <div :class="{shadow: blur}">
             <router-view></router-view>

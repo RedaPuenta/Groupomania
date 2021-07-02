@@ -14,14 +14,15 @@ import {mapState} from 'vuex'
 
 export default {
     name: "Error",
+
     computed: {
         ...mapState({
             errorAlert: "errorAlert",
             errorText: "errorText"
         })
     },
-    methods : {
-
+    
+    methods: {
         quitError: function(){
             this.$store.commit("DESACTIVE_ERROR")
         }

@@ -1,3 +1,4 @@
+//! Middleware qui permet de vérifier si un nom ou un prénom est valide
 module.exports = (req, res, next) => {
 
     const nom = req.body.nom

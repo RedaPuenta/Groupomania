@@ -1,3 +1,4 @@
+//! Middleware qui vérifie si la bio, le nom et le prénom sont correctes
 module.exports = (req, res, next) => {
 
     const firstName = req.body.firstName

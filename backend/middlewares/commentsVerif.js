@@ -1,3 +1,4 @@
+//! Middleware qui permet de vérifier si un commentaire de post est valide
 module.exports = (req, res, next) => {
 
     const reaction = req.body.reaction

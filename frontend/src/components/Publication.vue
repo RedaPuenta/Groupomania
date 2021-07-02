@@ -3,7 +3,7 @@
         <div @click="toWrite" v-if="new_write == false" class="neo media__new"></div>
         <div @click="toExit" v-if="new_write == true" class="neo media__exit"></div>
         <div class="media__post">
-            <form @submit.prevent="newPost" v-if="new_write == true" class="neo neo-relax media__post__write" enctype="multipart/form-data"> 
+            <form v-if="new_write == true" class="neo neo-relax media__post__write" enctype="multipart/form-data"> 
                 <div class="media__post__write__view">
                     <div class="media__post__write__view__shadow"></div>
                     <img v-if="fileExe == false" class="media__post__write__view__default" src="../assets/upload.png" alt="Image de téléchargement"/>
@@ -19,7 +19,8 @@
                     <button v-if="upload == true" @click="cancelUpload">Changer de fichier</button>
                 </div>
                 <textarea v-model="legend" class="media__post__write__publication" name="legend" rows="3" placeholder="Ecrivez votre légende ..."></textarea>
-                <button class="media__post__write__submit" type="submit">{{textButton}}</button>
+                <button @click="newPost" v-if="stopSend == false" class="media__post__write__submit" type="button">{{textButton}}</button>
+                <button v-if="stopSend == true" class="media__post__write__submit" type="button">{{textButton}}</button>
                 <div class="media__post__write__error">
                     <Error/>
                 </div>
@@ -33,9 +34,11 @@ import Error from './Error.vue'
 
 export default {
     name: "Media",
+
     components: {
         Error
     },
+
     data: function(){
         return{
             new_write: false,
@@ -44,13 +47,15 @@ export default {
             textButton: "Publier",
             upload: false,
             fileExe: false,
-            fileExeType: ""
+            fileExeType: "",
+            stopSend: false
         }
     },
-    methods: {
 
+    methods: {
         toWrite: function(){
             this.$store.commit("DESACTIVE_ERROR")
+            this.stopSend = false
             this.new_write = true
             this.textButton = "Publier"
             this.upload = false
@@ -59,9 +64,9 @@ export default {
             this.legend = ""
             this.$emit('blur-control', {blur: true})
         },
-
         toExit: function(){
             this.$store.commit("DESACTIVE_ERROR")
+            this.stopSend = false
             this.new_write = false
             this.textButton = "Publier"
             this.upload = false
@@ -70,7 +75,6 @@ export default {
             this.legend = ""
             this.$emit('blur-control', {blur: false})
         },
-
         controlFile: async function(event){
 
             const typeValid = ["image/jpeg", "image/jpg", "image/png", "image/gif", "video/mp4"]
@@ -109,15 +113,13 @@ export default {
                 }
             }
         },
-
         cancelUpload: function(){
             this.upload = false
             this.fileExe = false
             this.file = ""
         },
-
-        newPost: function(){
-            
+        newPost: function(event){
+            console.log(event)
             if(localStorage.getItem("token") !== null && localStorage.getItem("userId") !== null){
 
                 const userId = localStorage.getItem("userId")
@@ -127,14 +129,14 @@ export default {
                 formData.append('legend', this.legend)
                 formData.append('userId', userId)
 
-                this.$axios.post('multimedia/create', formData, 
+                this.$axios.post('multimedia/post', formData, 
                 {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 })
                 .then((response) => {
-
+                    this.stopSend =  true
                     this.$store.commit("DESACTIVE_ERROR")
                     this.fileExeType = "loading"
                     this.textButton = "Votre publication est en cours d'enrengistrement ..." 
@@ -167,14 +169,7 @@ export default {
             }
         
         }
-
     },
-    mounted: function(){
-        this.$store.dispatch('neo')
-    },
-    updated: function(){
-        this.$store.dispatch('neo')
-    }
 
 }
 </script>

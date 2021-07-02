@@ -21,4 +21,5 @@ const storage = multer.diskStorage({
     }
 })
 
+//! Middleware qui permet de télécharger des fichiers
 module.exports = multer({ storage }).single("file")

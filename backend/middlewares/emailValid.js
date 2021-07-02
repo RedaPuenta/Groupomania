@@ -1,3 +1,4 @@
+//! Middleware qui permet de vérifier si un email est valide
 module.exports = (req, res, next) => {
 
     const emailReq = req.body.email

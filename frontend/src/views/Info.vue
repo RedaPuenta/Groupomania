@@ -6,8 +6,8 @@
         <div class="info__avatar">
             <div class="info__avatar__list">
                 <div v-for="(item, index) in list_avatar" :key="index" class="info__avatar__list__item">
-                    <img :src="item.avatar" alt="Avatar">
-                    <div @click="getAvatar" :data-avatar="item.avatar" name="focus" class="info__avatar__list__item__shadow"></div>
+                    <img :src="item" alt="Avatar">
+                    <div @click="getAvatar" :data-avatar="item" name="focus" class="info__avatar__list__item__shadow"></div>
                 </div>
             </div>
         </div>
@@ -31,7 +31,7 @@
 
         <Error/>
         
-        <router-link class="info__after" :to="{name: 'Actuality'}">
+        <router-link class="info__after" :to="{name: 'Multimedia'}">
             <span>Je ferais ça plus tard</span>
         </router-link>
     
@@ -43,9 +43,11 @@ import Error from '@/components/Error.vue'
 
 export default {
     name: "Info",
+
     components: {
         Error
     },
+
     data: function(){
         return {
             list_avatar: [],
@@ -56,12 +58,11 @@ export default {
             buttonText: "Enrengistrer et continuer"
         }
     },  
-    methods: {
 
+    methods: {
         getAvatar: function(event){
             this.avatar = event.target.dataset.avatar
         },
-
         updateInfo: function(){
 
             const avatar = this.avatar
@@ -78,7 +79,7 @@ export default {
                 
                 setTimeout(function(){
 
-                    this.$router.push({name: 'Actuality'})
+                    this.$router.push({name: 'Multimedia'})
 
                 }.bind(this), 2000)
 
@@ -89,17 +90,18 @@ export default {
                 
             })
         }
-
     },
+
     beforeCreate: function(){
         this.$store.dispatch('accessPage')
     },
+
     mounted: function(){
         this.$store.dispatch('neo')
 
         this.$axios.get(`/asset/avatar`)
         .then((response) => {
-
+            console.log(response)
             this.list_avatar = response.data
 
             const userId = localStorage.getItem("userId")
@@ -121,6 +123,10 @@ export default {
         .catch((error) => {
             console.log(error)
         })
+    },
+
+    updated: function(){
+        this.$store.dispatch('neo')
     }
 }
 </script>

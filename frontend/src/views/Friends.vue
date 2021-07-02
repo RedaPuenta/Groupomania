@@ -47,17 +47,21 @@ import NavBar from '@/components/NavBar.vue'
 
 export default {
     name: "Friends",
+
     data: function(){
         return{
             user: []
         }
     },
+
     components: {
         NavBar
     },
+
     beforeCreate: function(){
         this.$store.dispatch('accessPage')
     },
+
     mounted: function(){
         this.$store.dispatch('neo')
 
@@ -68,9 +72,10 @@ export default {
             this.user = response.data
         })  
         .catch((error) =>{
-            console.log(JSON.parse(error.request.response).message)
+            console.log(error)
         })
-    }, 
+    },
+
     updated: function(){
         this.$store.dispatch('neo')
     }
@@ -195,6 +200,7 @@ export default {
                                 transform: translateY(-100px);
                                 z-index: 1;
                                 transition: transform 0.8s ease-in-out;
+                                color: black;
                             }
                         }
 

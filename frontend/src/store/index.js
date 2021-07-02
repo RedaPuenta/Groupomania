@@ -49,7 +49,7 @@ export default new Vuex.Store({
 
       if (userId !== null) {
 
-        axios.post('/auth/access', {userId: userId})
+        axios.get(`/account/${userId}`)
         .then(() => {
 
         })

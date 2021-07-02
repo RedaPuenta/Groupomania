@@ -56,19 +56,22 @@
 import NavBar from '../components/NavBar.vue'
 
 export default {
-
     name: "Profil",
+
     components: {
         NavBar
     },
+
     data: function(){
         return {
             data: []
         }
     },
+
     beforeCreate: function(){
         this.$store.dispatch('accessPage')
     },
+    
     mounted: function(){
         this.$store.dispatch('neo')
 
@@ -86,6 +89,7 @@ export default {
     updated: function(){
         this.$store.dispatch('neo')
     }
+
 }
 </script>
 

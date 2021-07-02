@@ -1,5 +1,6 @@
 const fs = require("fs")
 
+//! Middleware qui permet de vérifier si une légende de post est valide
 module.exports = (req, res, next) => {
 
     const legend = req.body.legend

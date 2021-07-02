@@ -1,3 +1,4 @@
+//! Middleware qui permet de vérifier si un mot de passe est fort
 module.exports = (req, res, next) => {
 
     const passwordReq = req.body.password

@@ -63,41 +63,39 @@ import Error from '@/components/Error.vue'
 
 export default {
     name: 'Home',
+
     components: {
         Error
     },
+
     data: function(){
         return {
-        mode: "connexion",
-        status: 'normal',
-        prenom: "",
-        nom: "",
-        email: "",
-        password: "",
-        autoConnect: false,
-        showPasswordIcon: false
+            mode: "connexion",
+            status: 'normal',
+            prenom: "",
+            nom: "",
+            email: "",
+            password: "",
+            autoConnect: false,
+            showPasswordIcon: false
         }
     },
 
   methods: {
-
     longConnexion: function(event){
         this.autoConnect = event.target.checked
     },
-
     showPassword: function(){
         this.$refs.inputPassword.type = "text"
         this.showPasswordIcon = true
     },
-
     maskPassword: function(){
         this.$refs.inputPassword.type = "password"
         this.showPasswordIcon = false
     },
-
     toConnect: function(){
 
-        this.$axios.post('auth/login', {email: this.email, password: this.password})
+        this.$axios.post('account/login', {email: this.email, password: this.password})
         .then((response) => {
             
             this.$store.commit("DESACTIVE_ERROR")
@@ -130,7 +128,7 @@ export default {
 
                 } else {
 
-                    this.$router.push({name: 'Actuality'})
+                    this.$router.push({name: 'Multimedia'})
                 }
 
             }.bind(this), 3000)
@@ -141,10 +139,9 @@ export default {
         })
 
     },
-
     toRegister: function(){
 
-        this.$axios.post('auth/signup', {email: this.email, password: this.password, nom: this.nom, prenom: this.prenom})
+        this.$axios.post('account/signup', {email: this.email, password: this.password, nom: this.nom, prenom: this.prenom})
         .then(() => {
 
             this.$store.commit("DESACTIVE_ERROR")
@@ -168,7 +165,6 @@ export default {
             this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)
         })
     },
-
     switchRegister: function(){
         this.$store.commit("DESACTIVE_ERROR")
         this.mode = 'register'
@@ -180,7 +176,6 @@ export default {
         this.email = ""
         this.password = ""
     },
-
     switchConnexion: function(){
         this.$store.commit("DESACTIVE_ERROR")
         this.mode = 'connexion'
@@ -192,7 +187,6 @@ export default {
         this.email = ""
         this.password = ""
     }
-    
   },
 
   beforeCreate: function(){
@@ -204,7 +198,7 @@ export default {
 
         this.$axios.post('/access', {userId: userIdLocal})
         .then(() => {
-            this.$router.push({name: "Actuality"})
+            this.$router.push({name: "Multimedia"})
         })
         .catch(() => {
             localStorage.clear()

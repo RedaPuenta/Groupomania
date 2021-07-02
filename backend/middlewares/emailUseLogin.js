@@ -2,6 +2,7 @@ require("dotenv").config()
 const cryptojs = require("crypto-js")
 const db = require("../mysql/connectDB")
 
+//! Middleware qui permet de savoir un email est déjà associé à un utilisateur lors de la connexion
 module.exports = (req, res, next) => {
     
     const emailUser = cryptojs.HmacMD5(req.body.email.toLowerCase(), process.env.CRYPTOJS_SECRET).toString()

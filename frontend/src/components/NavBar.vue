@@ -3,7 +3,7 @@
         <img class="navbar__logo" src="../assets/icon-left-font-monochrome-black.svg" alt="Logo de groupomania">
         <div v-if="mode == 'accueil'" class="navbar__explorer">
             <ul class="navbar__explorer__list">
-                <li><router-link to="/Actuality">Fil d'actualité</router-link></li>
+                <li><router-link to="/Multimedia">Multimedia</router-link></li>
                 <li><router-link to="/Friends">Mes collègues</router-link></li>
             </ul>
         </div>
@@ -38,7 +38,7 @@
             </router-link>
         </div>
         <div class="navbar__back" v-if="mode == 'account'">
-            <router-link :to="{name: 'Actuality'}">
+            <router-link :to="{name: 'Multimedia'}">
                 <span class="navbar__back__text">Retour à l'accueil</span>
                 <i class="navbar__back__icon fas fa-long-arrow-alt-right fa-lg"></i>
             </router-link>
@@ -49,9 +49,11 @@
 <script>
 export default {
     name: 'NavBar',
+    
     props: {
         mode: {type: String, required: true}
     },
+
     data: function(){
         return {
             avatar: "",
@@ -61,8 +63,8 @@ export default {
             toggle: false
         }
     },
-    methods: {
 
+    methods: {
         toggleControl: function(){
             
             var more = document.getElementById("more")
@@ -75,13 +77,11 @@ export default {
                 this.toggle = false
             }
         },
-
         deconnect: function(){
 
             localStorage.clear()
             this.$router.push({name: 'Connexion'})
         },
-
         deleteUser: function(){
 
             const userId = localStorage.getItem('userId')
@@ -98,10 +98,9 @@ export default {
             })
 
         }
-
     },
-    mounted: function(){
-        this.$store.dispatch('neo')
+
+    beforeMount: function(){
 
         const userId = localStorage.getItem("userId")
         this.userId = userId
@@ -118,9 +117,6 @@ export default {
         .catch((error) => {
             console.log(error)
         })
-    },
-    updated: function(){
-        this.$store.dispatch('neo')
     }
 }
 </script>

@@ -2,7 +2,7 @@
     <div id="connexion">
 
         <img class="logo" src="../assets/icon-left-font-monochrome-black.svg" alt="Logo de Groupomania">
-        <div class="separateur neo neo-press"></div>
+        <div class="separateur neo-press"></div>
 
         <h2 v-if="mode == 'register'" class="titre">Inscription</h2>
         <p v-if="mode == 'register'" class="question">Vous avez déjà un compte ? <span @click="switchConnexion" class="question--change">Se connecter</span></p>
@@ -13,15 +13,15 @@
         <form class="formulaire">
 
             <div v-if="mode == 'register'" class="formulaire__name">
-                <input class="neo input" required v-model="prenom" type="text" placeholder="Prénom">
-                <input class="neo input" required v-model="nom" type="text" placeholder="Nom">
+                <input class="neo-inverse input" required v-model="prenom" type="text" placeholder="Prénom">
+                <input class="neo-inverse input" required v-model="nom" type="text" placeholder="Nom">
             </div>
 
             <div class="formulaire__identifiant">
 
-                <input class="neo input" required v-model="email" type="mail" placeholder="Email">
+                <input class="neo-inverse input" required v-model="email" type="mail" placeholder="Email">
                 <div class="formulaire__identifiant__password">
-                    <input class="neo input" required ref="inputPassword" v-model="password" type="password" placeholder="Mot de passe">
+                    <input class="neo-inverse input" required ref="inputPassword" v-model="password" type="password" placeholder="Mot de passe">
                     <div class="formulaire__identifiant__password__eye">
                         <div class="formulaire__identifiant__password__eye__icon" v-if="showPasswordIcon == false" @click="showPassword">
                             <img class="formulaire__identifiant__password__eye__icon--close" src="../assets/eye-close.svg" alt="">
@@ -32,13 +32,15 @@
                     </div>
                 </div>
 
-                <button v-if="mode == 'register'" @click.prevent="toRegister" class="neo formulaire__identifiant__submit" type="submit" value="S'inscrire">
+                <button id="neoButton" v-if="mode == 'register'" class="formulaire__identifiant__submit" type="button" value="S'inscrire">
+                    <div @click.self="toRegister" class="formulaire__identifiant__submit__self"></div>
                     <span v-if="status == 'loading'">Inscription en cours ...</span>
                     <span v-if="status == 'normal'">S'inscrire</span>
                     <span v-if="status == 'create'">Votre compte à été crée !</span>
                 </button>
 
-                <button v-if="mode == 'connexion'" @click.prevent="toConnect" class="neo formulaire__identifiant__submit" type="submit" value="Se connecter">
+                <button id="neoButton" v-if="mode == 'connexion'" class="formulaire__identifiant__submit" type="button" value="Se connecter">
+                    <div @click.self="toConnect" class="formulaire__identifiant__submit__self"></div>
                     <span v-if="status == 'loading'">Connexion en cours ...</span>
                     <span v-if="status == 'normal'">Se connecter</span>
                 </button>
@@ -94,7 +96,7 @@ export default {
         this.showPasswordIcon = false
     },
     toConnect: function(){
-
+        
         this.$axios.post('account/login', {email: this.email, password: this.password})
         .then((response) => {
             
@@ -135,7 +137,7 @@ export default {
             
         })
         .catch(error => {
-            this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)
+            this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)            
         })
 
     },
@@ -143,7 +145,7 @@ export default {
 
         this.$axios.post('account/signup', {email: this.email, password: this.password, nom: this.nom, prenom: this.prenom})
         .then(() => {
-
+           
             this.$store.commit("DESACTIVE_ERROR")
             this.status = 'loading'
 
@@ -213,6 +215,14 @@ export default {
   },
 
   mounted: function(){
+    /*
+    let neo_button = document.querySelectorAll("#neoButton")
+
+    for (let i = 0; i < neo_button.length; i++) {
+        
+        neo_button[i].dataset.active = false
+    }*/
+
     this.$store.dispatch('neo')
   },
 
@@ -232,10 +242,6 @@ export default {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-    }
-
-    .input:focus{
-       background-color: $color-third;
     }
 
     .logo{
@@ -262,7 +268,7 @@ export default {
         margin-bottom: 10px;
         height: 50px;
         text-align: center;
-        transition: background-color 0.7s ease-in-out;
+        border-radius: 30px;
     }
 
     .question{
@@ -328,12 +334,23 @@ export default {
             }
 
             &__submit{
-                background-color: $button-action;
-                color: white;
                 cursor: pointer;
+                position: relative;
+                background-color: $button-action;
+                box-shadow: $box-shadow-button;
+
+                &__self{
+                    position: absolute;
+                    height: 100%;
+                    width: 100%;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                }
 
                 span{
-                    color: white;
+                    color: $button-action-inner;
                 }
             }
 
@@ -350,6 +367,7 @@ export default {
                 }
 
                 &__checkbox{
+                    border-radius: 5px;
                     width: 20px;
                     height: 20px;
                     margin-right: 8px;

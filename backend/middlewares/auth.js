@@ -153,9 +153,12 @@ module.exports = (req, res, next) => {
                             
                             //* On recherche dans la base de donnée si le "userId" du post correspond à celui de l'émetteur
                             db.query(`
-                                SELECT userId FROM post
+                                SELECT userId FROM multimedia
+                                WHERE postId = ?
+                                UNION
+                                SELECT userId FROM forum
                                 WHERE postId = ?`,
-                                [postId],
+                                [postId, postId],
                                 function(error, results){
 
                                     //: Gestion des erreurs
@@ -201,7 +204,7 @@ module.exports = (req, res, next) => {
     
     //* Sinon, si le token n'est pas authentique ...
     } catch {
-
+        
         //* On renvoie une réponse d'échec
         res.status(498).json({message: "Le token est invalide"})
         

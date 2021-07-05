@@ -1,7 +1,7 @@
 <template>
     <div>
         <NavBar mode="account"/>
-        <div class="neo neo-relax profil">
+        <div class="neo profil">
             <div class="profil__info">
                 <div class="profil__info__avatar">   
                     <img :src="data.avatar" alt="Avatar">
@@ -108,7 +108,7 @@ export default {
         width: 80%;
         padding: 30px;
         overflow: hidden;
-        border-radius: 30px!important;
+        border-radius: 30px;
         
 
         &__info{
@@ -161,7 +161,7 @@ export default {
 
                     &__cache{
                         margin-bottom: 50px;
-                        border-radius: 10px!important;
+                        border-radius: 20px;
                         display: flex;
                         justify-content: center;
                         align-items: center;

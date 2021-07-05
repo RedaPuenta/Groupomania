@@ -1,25 +1,25 @@
 <template>
-    <div class="multimedia">
-        <NavBar class="multimedia__navbar" mode='accueil'/>
-        <Publication :mode="'Multimedia'"  @blur-control="updateBlur"/>
-        <div class="multimedia__contain" :class="{shadow: blur}">
-            <NavJuge class="multimedia__contain__nav" @navChoice="get_Preference" :preference="choice" :direction="'Multimedia'"/>
-            <Media class="multimedia__contain__media" :preference="choice" :direction="'MultimediaID'" :focus="false"/>
+  <div class="agora">
+        <NavBar class="agora__navbar" mode='accueil'/>
+        <Publication :mode="'Agora'" @blur-control="updateBlur"/>
+        <div class="agora__contain" :class="{shadow: blur}">
+            <NavJuge class="agora__contain__nav" @navChoice="get_Preference" :preference="choice" :direction="'Agora'"/>
+            <Forum class="agora__contain__media" :preference="choice" :direction="'AgoraID'" :focus="false"/>
         </div>
     </div>
 </template>
 
 <script>
 import NavJuge from '../components/NavJuge.vue'
-import Media from '../components/Media.vue'
 import NavBar from '../components/NavBar.vue'
 import Publication from '../components/Publication.vue'
+import Forum from '../components/Forum.vue'
 
 export default {
-    name: "Multimedia",
+    name: "Agora",
 
     components: {
-        Media, NavJuge, NavBar, Publication
+        NavJuge, NavBar, Publication, Forum
     },
 
     data: function(){
@@ -43,6 +43,7 @@ export default {
     },
 
     beforeMount: function(){
+        
         let params = (new URL(document.location)).searchParams
         let IdSearch = params.get("preference")
 
@@ -70,7 +71,7 @@ export default {
         filter: blur(20px);
     }
 
-    .multimedia{
+    .agora{
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -83,9 +84,9 @@ export default {
         }
 
         &__contain{
-            width: 100%;
             position: relative;
             z-index: 1;
+            width: 100%;
 
             &__nav{
                 position: relative;

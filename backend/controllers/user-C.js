@@ -42,15 +42,15 @@ exports.friends = (req, res, next)  => {
     //* On récupère dans la base de données des informations sur tout les autres utilisateurs (sauf celui qui demande)
     //* Avatar, prénom, nom, bio + nombre de contenu "agora" et "multimedia"
     db.query(`
-        SELECT COUNT(post.postId) As forum, user_media.userId, user_media.multimedia, user_media.firstName, user_media.lastName, user_media.avatar, user_media.bio, user_media.dateCreation FROM (
-            SELECT COUNT(post.postId) AS multimedia, user.userId, user.firstName, user.lastName, user.avatar, user.bio, user.dateCreation 
+        SELECT COUNT(forum.postId) As forum, user_media.userId, user_media.multimedia, user_media.firstName, user_media.lastName, user_media.avatar, user_media.bio, user_media.dateCreation FROM (
+            SELECT COUNT(multimedia.postId) AS multimedia, user.userId, user.firstName, user.lastName, user.avatar, user.bio, user.dateCreation 
             FROM user
-            LEFT JOIN post
-            ON post.userId = user.userId AND post.type = "media"
+            LEFT JOIN multimedia
+            ON multimedia.userId = user.userId
             GROUP BY user.userId
         ) AS user_media
-        LEFT JOIN post
-        ON post.userId = user_media.userId AND post.type = "agora"
+        LEFT JOIN forum
+        ON forum.userId = user_media.userId
         WHERE user_media.userId != ?
         GROUP BY user_media.userId`, 
         [userId],
@@ -74,7 +74,7 @@ exports.friends = (req, res, next)  => {
 
 //! Fonction qui permet de récupérer toutes les informations relatives à la page "Profil" (ALL)
 exports.profil = (req, res, next)  => {
-
+    
     //* On récupère le "userId" de l'utilisateur ciblé
     const userId = req.params.userId
     
@@ -83,15 +83,15 @@ exports.profil = (req, res, next)  => {
     db.query(`
         SELECT COUNT(comments.userId) AS likes, score_comments.* FROM (
             SELECT COUNT(likes.userId) AS comments, score_likes.* FROM (
-                SELECT COUNT(post.postId) As forum, user_media.multimedia,  user_media.userId, user_media.firstName, user_media.lastName, user_media.avatar, user_media.bio, user_media.dateCreation FROM (
-                    SELECT COUNT(post.postId) AS multimedia, user.userId, user.firstName, user.lastName, user.avatar, user.bio, user.dateCreation 
+                SELECT COUNT(forum.postId) As forum, user_media.multimedia, user_media.userId, user_media.firstName, user_media.lastName, user_media.avatar, user_media.bio, user_media.dateCreation FROM (
+                    SELECT COUNT(multimedia.postId) AS multimedia, user.userId, user.firstName, user.lastName, user.avatar, user.bio, user.dateCreation 
                     FROM user
-                    LEFT JOIN post
-                    ON post.userId = user.userId AND post.type = "media"
+                    LEFT JOIN multimedia
+                    ON multimedia.userId = user.userId
                     GROUP BY user.userId
                 ) AS user_media
-                LEFT JOIN post
-                ON post.userId = user_media.userId AND post.type = "agora"
+                LEFT JOIN forum
+                ON forum.userId = user_media.userId
                 WHERE user_media.userId = ?
             ) AS score_likes
             LEFT JOIN likes
@@ -106,10 +106,10 @@ exports.profil = (req, res, next)  => {
             if(error == null) {
 
                 //* On créer le score de "réaction" et de "participation" de l'utilisateur selon un algorithme
-                let pts_likes = 14
-                let pts_comments = 11
-                let pts_multimedia = 17
-                let pts_forum = 21
+                const pts_likes = 14
+                const pts_comments = 11
+                const pts_multimedia = 17
+                const pts_forum = 21
                 let score_reaction = (parseInt(results[0].likes) * pts_likes) + (parseInt(results[0].comments) * pts_comments)
                 let score_participation = (parseInt(results[0].multimedia) * pts_multimedia) + (parseInt(results[0].forum) * pts_forum)
 
@@ -180,7 +180,7 @@ exports.deleteUser = (req, res, next) => {
 
     //* On récupère dans la base de donnée tout les fichiers (url) associés à l'utilisateur
     db.query(`
-        SELECT media FROM post
+        SELECT media FROM multimedia
         WHERE userId = ?`, 
         [userId],
         function(error, results, fields){

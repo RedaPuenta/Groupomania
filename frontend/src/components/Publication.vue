@@ -1,24 +1,25 @@
 <template>
   <div class="media">
-        <div @click="toWrite" v-if="new_write == false" class="neo media__new"></div>
+        <div @click="toWrite" v-if="new_write == false" :class="{bg_multimedia: multimedia, bg_agora: agora}" class="neo media__new"></div>
         <div @click="toExit" v-if="new_write == true" class="neo media__exit"></div>
         <div class="media__post">
-            <form v-if="new_write == true" class="neo neo-relax media__post__write" enctype="multipart/form-data"> 
-                <div class="media__post__write__view">
+            <form v-if="new_write == true" :class="{write_multimedia: multimedia, write_agora: agora}" class="neo neo-relax media__post__write" enctype="multipart/form-data"> 
+                <div v-if="multimedia == true" class="media__post__write__view">
                     <div class="media__post__write__view__shadow"></div>
                     <img v-if="fileExe == false" class="media__post__write__view__default" src="../assets/upload.png" alt="Image de téléchargement"/>
                     <img v-if="fileExe == true && fileExeType == 'image'" class="media__post__write__view__file" ref="mediaImage" src="#" alt="Votre fichier"/>
                     <video v-if="fileExe == true && fileExeType == 'video'" class="media__post__write__view__file" ref="mediaVideo" autoplay muted loop src="#"></video>
                     <img v-if="fileExe == true && fileExeType == 'loading'" class="media__post__write__view__file" src="../assets/loading.gif" alt="Votre fichier"/>
                 </div>
-                <div class="media__post__write__control">
+                <div v-if="multimedia == true" class="media__post__write__control">
                     <div v-if="upload == false" class="media__post__write__control__upload"> 
                         <label class="media__post__write__control__upload--label" for="file">Choisir un fichier</label>
                         <input class="media__post__write__control__upload--input" type="file" ref="fileMedia" @change="controlFile" id="file" name="file">
                     </div>
                     <button v-if="upload == true" @click="cancelUpload">Changer de fichier</button>
                 </div>
-                <textarea v-model="legend" class="media__post__write__publication" name="legend" rows="3" placeholder="Ecrivez votre légende ..."></textarea>
+                <textarea v-if="multimedia == true" v-model="legend" class="media__post__write__publication" name="legend" rows="3" placeholder="Ecrivez votre légende ..."></textarea>
+                <textarea v-if="agora == true" v-model="titre" class="media__post__write__publication publication-agora" name="titre" rows="5" placeholder="Ecrivez votre sujet ..."></textarea>
                 <button @click="newPost" v-if="stopSend == false" class="media__post__write__submit" type="button">{{textButton}}</button>
                 <button v-if="stopSend == true" class="media__post__write__submit" type="button">{{textButton}}</button>
                 <div class="media__post__write__error">
@@ -39,16 +40,23 @@ export default {
         Error
     },
 
+    props: {
+        mode: {type: String, required: true}
+    }, 
+
     data: function(){
         return{
             new_write: false,
             file: "",
             legend: "",
+            titre: "",
             textButton: "Publier",
             upload: false,
             fileExe: false,
             fileExeType: "",
-            stopSend: false
+            stopSend: false,
+            multimedia: false, 
+            agora: false
         }
     },
 
@@ -62,6 +70,7 @@ export default {
             this.fileExe = false
             this.file = ""
             this.legend = ""
+            this.titre = ""
             this.$emit('blur-control', {blur: true})
         },
         toExit: function(){
@@ -73,6 +82,7 @@ export default {
             this.fileExe = false
             this.file = ""
             this.legend = ""
+            this.titre = ""
             this.$emit('blur-control', {blur: false})
         },
         controlFile: async function(event){
@@ -118,23 +128,60 @@ export default {
             this.fileExe = false
             this.file = ""
         },
-        newPost: function(event){
-            console.log(event)
-            if(localStorage.getItem("token") !== null && localStorage.getItem("userId") !== null){
+        getApi: function(){
 
-                const userId = localStorage.getItem("userId")
+            if(this.multimedia == true) {
+
+                return '/multimedia/post'
+
+            } else if(this.agora == true) {
+
+                return '/agora/post'
+            }
+
+        },
+        getBody: function(){
+
+            const userId = localStorage.getItem("userId")
+
+            if(this.multimedia == true) {
 
                 let formData = new FormData()
                 formData.append('file', this.file)
                 formData.append('legend', this.legend)
                 formData.append('userId', userId)
+                console.log(formData)
+               return formData
 
-                this.$axios.post('multimedia/post', formData, 
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                })
+            } else if (this.agora == true) {
+
+                return {userId: userId, titre: this.titre}
+
+            }
+
+        },
+        getHeaders: function(){
+
+            if(this.multimedia == true) {
+
+                return {headers: {'Content-Type': 'multipart/form-data'}}
+
+            } else if(this.agora == true) {
+
+                return {}
+
+            }
+
+        },
+        newPost: function(){
+            
+            if(localStorage.getItem("token") !== null && localStorage.getItem("userId") !== null){
+
+                const adresse = this.getApi()
+                const body = this.getBody()
+                const headers = this.getHeaders()
+                
+                this.$axios.post(adresse, body, headers)
                 .then((response) => {
                     this.stopSend =  true
                     this.$store.commit("DESACTIVE_ERROR")
@@ -171,6 +218,20 @@ export default {
         }
     },
 
+    mounted: function(){
+
+        if(this.mode == 'Agora') {
+
+            this.agora = true
+
+        } else if(this.mode == 'Multimedia'){
+
+            this.multimedia = true
+
+        }
+
+    }
+
 }
 </script>
 
@@ -185,16 +246,24 @@ export default {
         flex-direction: column;
         align-items: center;
         z-index: 5;
+
+        .bg_agora{
+            background: no-repeat center/40% url("../assets/new-forum.svg") rgb(0, 0, 0);
+        }
+
+        .bg_multimedia{
+            background: no-repeat center/40% url("../assets/new-multimedia.svg") rgb(0, 0, 0);
+        }
         
         &__new{
             height: 70px;
             width: 70px;
-            background: no-repeat center/40% url("../assets/new-media.svg") black;
             cursor: pointer;
             position: fixed;
             bottom: 30px;
             right: 30px;
             z-index: 3;
+            border-radius: 20px;
         }
 
         &__exit{
@@ -206,6 +275,7 @@ export default {
             bottom: 30px;
             right: 30px;
             z-index: 3;
+            border-radius: 20px;
         }
 
         &__post{
@@ -217,10 +287,17 @@ export default {
             position: fixed;
             z-index: 3;
 
+            .write_agora{
+                margin-top: 30vh;
+            }
+
+            .write_multimedia{
+                margin-top: 10vh;
+            }
+
             &__write{
                 padding: 10px;
                 display: block;
-                margin-top: 70px;
                 width: 500px;
                 overflow: hidden;
                 border-radius: 20px!important;
@@ -274,7 +351,7 @@ export default {
                         height: 30px;
                         font-size: rem(12px);
                         background-color: $button-action;
-                        color: white;
+                        color: $button-action-inner;
                         box-shadow: $box-shadow-button;
                         overflow: hidden;
                     }
@@ -310,6 +387,10 @@ export default {
                     }
 
                 }
+
+                .publication-agora{
+                    border-radius: 10px 10px 0 0;
+                }
             
                 &__publication{
                     resize: none;
@@ -325,7 +406,7 @@ export default {
                     width: 100%;
                     height: 40px;
                     background-color: $button-action;
-                    color: white;
+                    color: $button-action-inner;
                     cursor: pointer;
                     border-radius: 20px!important;
                     box-shadow: $box-shadow-button;

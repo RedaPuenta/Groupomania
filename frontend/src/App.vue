@@ -52,11 +52,11 @@ input{
 }
 
 .neo-press{
-    background: linear-gradient(145deg, $color-fourth, $color-third);
+  background: linear-gradient(145deg, $color-fourth, $color-third);
 }
 
 .neo-relax{
-    background: linear-gradient(145deg, $color-third, $color-fourth);
+  background: linear-gradient(145deg, $color-third, $color-fourth);
 }
 
 </style>

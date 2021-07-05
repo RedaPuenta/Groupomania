@@ -1,26 +1,25 @@
 const idGenerator = require ("uuid")
 const db = require("../mysql/connectDB")
-const fs = require("fs")
 
-//! Fonction qui permet de récupérer plusieurs contenus multimédia (USER)
+//! Fonction qui permet de récupérer plusieurs contenus agora (USER)
 exports.recover = (req, res, next) => {
-
+    
     //* On récupère le "userId" de l'utilisateur et le filtre (préférence)
     const userId = req.body.userId
     const preference = req.body.preference
 
     //* On stock la requête SQL qui récupère les posts et les préférences de l'utilisateur liés à chacun de ces posts
-    //* Pour chaque post --> postId, userId, avatar, firstName, lastName, legend, media, likes, comments, my_post, my_like, my_comments, datePost
+    //* Pour chaque post --> postId, userId, avatar, firstName, lastName, titre, likes, comments, my_post, my_like, my_comments, datePost
     const all = `
-    SELECT req5.*, COUNT(multimedia.userId) AS my_post FROM (
+    SELECT req5.*, COUNT(forum.userId) AS my_post FROM (
         SELECT req4.*, COUNT(comments.userId) AS my_comments FROM (
 			SELECT req3.*, COUNT(likes.userId) AS my_like FROM (
                     SELECT req2.*, user.firstName, SUBSTRING(user.lastName, 1, 1) AS lastName, user.avatar FROM (
                         SELECT req1.*, COUNT(likes.dateLikes) AS likes FROM (
-                            SELECT multimedia.*, COUNT(comments.dateComments) AS comments
+                            SELECT forum.*, COUNT(comments.dateComments) AS comments
                             FROM comments
-                            RIGHT JOIN multimedia
-                            ON multimedia.postId = comments.postId
+                            RIGHT JOIN forum
+                            ON forum.postId = comments.postId
                             GROUP BY postId
                         ) AS req1
                         LEFT JOIN likes
@@ -41,11 +40,11 @@ exports.recover = (req, res, next) => {
             GROUP BY req4.postId
             ORDER BY req4.datePost DESC
     ) AS req5
-    LEFT JOIN multimedia
-    ON multimedia.userId = req5.userId 
-    AND multimedia.userId = ?
+    LEFT JOIN forum
+    ON forum.userId = req5.userId 
+    AND forum.userId = ?
     GROUP BY req5.postId`
-
+    
     //* On détermine la requête SQL selon le filtre (préférence)
     switch(preference){
 
@@ -105,8 +104,6 @@ exports.recover = (req, res, next) => {
 
                             //* On injecte ses commentaires dans le résultat (maximum 3)
                             results[i].commentsList = comments
-                            //* On contruit l'url du fichier associées 
-                            results[i].media = `${req.protocol}://${req.get('host')}/media/${results[i].media}`
                             //* On donne une position (utile pour VUE.JS)
                             results[i].position = i
                             //* Et on monte le résultat final
@@ -132,25 +129,25 @@ exports.recover = (req, res, next) => {
 
 }
 
-//! Fonction qui permet de récupérer un seule contenu multimédia (USER)
+//! Fonction qui permet de récupérer un seule contenu agora (USER)
 exports.recoverOne = (req, res, next) => {
-     
+    
     //* On récupère le "userId" de l'utilisateur et le "postId" du post
     const postId = req.body.postId
     const userId = req.body.userId
 
     //* On stock la requête SQL qui récupère les posts et les préférences de l'utilisateur liés à chacun de ces posts
-    //* Pour chaque post --> postId, userId, avatar, firstName, lastName, legend, media, likes, comments, my_post, my_like, my_comments, datePost
+    //* Pour chaque post --> postId, userId, avatar, firstName, lastName, titre, likes, comments, my_post, my_like, my_comments, datePost
     const all = `
-    SELECT req5.*, COUNT(multimedia.userId) AS my_post FROM (
+    SELECT req5.*, COUNT(forum.userId) AS my_post FROM (
         SELECT req4.*, COUNT(comments.userId) AS my_comments FROM (
 			SELECT req3.*, COUNT(likes.userId) AS my_like FROM (
                     SELECT req2.*, user.firstName, SUBSTRING(user.lastName, 1, 1) AS lastName, user.avatar FROM (
                         SELECT req1.*, COUNT(likes.dateLikes) AS likes FROM (
-                            SELECT multimedia.*, COUNT(comments.dateComments) AS comments
+                            SELECT forum.*, COUNT(comments.dateComments) AS comments
                             FROM comments
-                            RIGHT JOIN multimedia
-                            ON multimedia.postId = comments.postId
+                            RIGHT JOIN forum
+                            ON forum.postId = comments.postId
                             GROUP BY postId
                         ) AS req1
                         LEFT JOIN likes
@@ -171,16 +168,16 @@ exports.recoverOne = (req, res, next) => {
             GROUP BY req4.postId
             ORDER BY req4.datePost DESC
     ) AS req5
-    LEFT JOIN multimedia
-    ON multimedia.userId = req5.userId 
-    AND multimedia.userId = ?
+    LEFT JOIN forum
+    ON forum.userId = req5.userId 
+    AND forum.userId = ?
     GROUP BY req5.postId`
-    
+
     //* On détermine la requête SQL
     var sql = `SELECT * FROM (${all}) AS my WHERE postId = ?`
-    var params = [userId, userId, userId, postId]  
-    
-    //* On récupère dans la base de donnée le post en question et les préférences de l'utilisateur lié à ce post
+    var params = [userId, userId, userId, postId]
+
+    //* On récupère dans la base de donnée le post et les préférences de l'utilisateur liés à ce post
     db.query(sql, params,
         function(error, results, fields) {
             
@@ -234,22 +231,21 @@ exports.recoverOne = (req, res, next) => {
     )
 }
 
-//! Fonction qui permet de créer un contenu multimédia (USER)
+//! Fonction qui permet de créer un contenu agora (USER)
 exports.post = (req, res, next) => {
-    
-    //* On récupère le "userId" (propriétaire), l'url du fichier et la légende du post
+
+    //* On récupère le "userId" (propriétaire) et le titre du post
     const userId = req.body.userId
-    const media = req.file.filename
-    const legend = req.body.legend
+    const titre = req.body.titre
 
     //* On génère un "postId" pour la nouvelle publication
     const postId = idGenerator.v1()
 
     //* On créer un nouvelle publication dans la base de donnée
     db.query(`
-        INSERT INTO multimedia (userId, postId, media, legend, datePost) 
-        VALUES(?, ?, ?, ?, NOW())`, 
-        [userId, postId, media, legend], 
+        INSERT INTO forum (userId, postId, titre, datePost) 
+        VALUES(?, ?, ?, NOW())`, 
+        [userId, postId, titre], 
         function(error, results, fields){
 
             //: Gestion des erreurs
@@ -258,11 +254,6 @@ exports.post = (req, res, next) => {
 
             //: Gestion des erreurs
             } else {
-                
-                //* On supprime le fichier précédemment télécharger par le serveur
-                fs.unlink(`media/${media}`, (err) => {
-                    if (err) throw err
-                })
                 res.status(500).json({message: "Désolé, votre publication n'a pu être publiée !"})   
             }
         }
@@ -270,59 +261,29 @@ exports.post = (req, res, next) => {
     
 }
 
-//! Fonction qui permet de supprimer un contenu multimédia (USER + ADMIN)
+//! Fonction qui permet de supprimer un contenu agora (USER + ADMIN)
 exports.deletePost = (req, res, next) => {
     
     //* On récupère le "postId" (contenu)
     const postId = req.params.postIdVerif
-
-    //* On cherche dans la base de donnée le nom du fichier associé à ce "postId"
+           
+    //* On supprime le post de la base de donnée
     db.query(`
-        SELECT media FROM multimedia
+        DELETE FROM forum
         WHERE postId = ?
         `,
         [postId],
-        function(error, results, next) {
+        function(error, results, fields){
 
             //: Gestion des erreurs
             if(error == null) {
-
-                //* On stock le nom du fichier dans une variable
-                const media = results[0].media
-                
-                //* On supprime le post de la base de donnée
-                db.query(`
-                    DELETE FROM multimedia
-                    WHERE postId = ?
-                    `,
-                    [postId],
-                    function(error, results, fields){
-
-                        //: Gestion des erreurs
-                        if(error == null) {
-
-                            //* On supprime le fichier qui était associé à ce post
-                            fs.unlink(`media/${media}`, (err) => {
-                                if (err) throw err
-                            })
-
-                            res.status(200).json({message: "Félicitation, votre publication a été supprimée"})
-                        //: Gestion des erreurs
-                        } else {
-                            res.status(500).json({message: "Désolé, votre publication n'a pu être supprimée !"})
-                        }
-
-                    }
-                )
-
+                res.status(200).json({message: "Félicitation, votre publication a été supprimée"})
             //: Gestion des erreurs
             } else {
-                res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
+                res.status(500).json({message: "Désolé, votre publication n'a pu être supprimée !"})
             }
-            
 
         }
     )
-
     
 }

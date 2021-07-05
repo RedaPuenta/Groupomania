@@ -8,6 +8,8 @@ import Friends from '../views/Friends.vue'
 
 import Multimedia from '../views/Multimedia.vue'
 import IDMultimedia from '../views/MultimediaID.vue'
+import Agora from '../views/Agora.vue'
+import IDAgora from '../views/AgoraID.vue'
 
 Vue.use(VueRouter)
 
@@ -45,6 +47,16 @@ const routes = [
     path: "/Multimedia/:id",
     name: "MultimediaID",
     component: IDMultimedia
+  },
+  {
+    path: "/Agora",
+    name: "Agora",
+    component: Agora
+  },
+  {
+    path: "/Agora/:id",
+    name: "AgoraID",
+    component: IDAgora
   }
 ]
 

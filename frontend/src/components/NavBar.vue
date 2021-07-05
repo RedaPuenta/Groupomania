@@ -4,7 +4,8 @@
         <div v-if="mode == 'accueil'" class="navbar__explorer">
             <ul class="navbar__explorer__list">
                 <li><router-link to="/Multimedia">Multimedia</router-link></li>
-                <li><router-link to="/Friends">Mes collègues</router-link></li>
+                <li><router-link to="/Agora">Agora</router-link></li>
+                <li><router-link to="/Friends">Camarade</router-link></li>
             </ul>
         </div>
         <div v-if="mode == 'accueil'" class="navbar__account">
@@ -275,17 +276,17 @@ export default {
             background-color: $button-action;
             border-radius: 10px;
             box-shadow: $box-shadow-button;
-            color: white;
+            color: $button-action-inner;
             cursor: pointer;
 
             &__text{
                 margin-right: 10px;
-                color: white;
+                color: $button-action-inner;
             }
 
             &__icon{
                 font-size: rem(15px);
-                color: white;
+                color: $button-action-inner;
             }
         }
 

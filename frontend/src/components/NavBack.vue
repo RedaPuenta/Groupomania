@@ -30,7 +30,7 @@ export default {
         margin: 30px 0 20px 0;
 
         &__back{
-            background-color: $button-action!important;
+            background-color: $button-action;
             box-shadow: $box-shadow-button;
             cursor: pointer;
             padding: 10px 20px;
@@ -39,7 +39,8 @@ export default {
             align-items: center;
             position: relative;
             z-index: 8;
-            color: white;
+            color: $button-action-inner;
+            border-radius: 20px;
 
             &__icon{
                 margin-right: 10px;

@@ -2,7 +2,7 @@
     <div class="friends">
         <NavBar mode= 'accueil' class="friends__navbar"/>
         <div class="friends__list">
-            <router-link v-for="(item, index) in user" :key="index" :to="{name: 'Profil', params: {id: item.userId}}" class="neo neo-relax friends__list__user">
+            <router-link v-for="(item, index) in user" :key="index" :to="{name: 'Profil', params: {id: item.userId}}" class="neo friends__list__user">
                 <div>
                     <div class="friends__list__user__image">
                         <div class="friends__list__user__image__shadow"></div>
@@ -27,14 +27,14 @@
                             <span>{{item.multimedia}}</span>
                             <div class="friends__list__user__score__focus__elements__shadow"></div>
                         </div>
-                        <span>Multimédia</span>
+                        <span class="friends__list__user__score__focus__type">Multimédia</span>
                     </div>
                     <div class="friends__list__user__score__focus">
                         <div class="friends__list__user__score__focus__elements">
                             <span>{{item.forum}}</span>
                             <div class="friends__list__user__score__focus__elements__shadow"></div>
                         </div>
-                        <span>Agora</span>
+                        <span class="friends__list__user__score__focus__type">Agora</span>
                     </div>
                 </div>
             </router-link>
@@ -116,6 +116,7 @@ export default {
                 padding: 0 30px;
                 margin-bottom: 50px;
                 cursor: pointer;
+                border-radius: 30px;
 
                 &__image{
                     position: relative;
@@ -200,7 +201,7 @@ export default {
                                 transform: translateY(-100px);
                                 z-index: 1;
                                 transition: transform 0.8s ease-in-out;
-                                color: black;
+                                color: $color-primary;
                             }
                         }
 
@@ -244,7 +245,10 @@ export default {
                             height: 40px;
                             border-radius: 100%;
                             font-weight: bold;
-                            color: black;
+                            
+                            span{
+                                color: black;
+                            }
 
                             &__shadow{
                                 border-radius: 100%;
@@ -259,8 +263,8 @@ export default {
                             }
                         }
 
-                        span{
-                            color: black;
+                        &__type{
+                            color: $color-primary;
                         }
                     }
                 }

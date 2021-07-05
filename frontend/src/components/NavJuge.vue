@@ -58,7 +58,7 @@ export default {
 
     .no_active{
         background-color: $button-action;
-        color: white;
+        color: $button-action-inner;
     }
 
     .nav{

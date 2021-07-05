@@ -3,7 +3,7 @@
 
         <h1 class="info__titre">Compléter vos informations</h1>
 
-        <div class="info__avatar">
+        <div class="neo-inverse info__avatar">
             <div class="info__avatar__list">
                 <div v-for="(item, index) in list_avatar" :key="index" class="info__avatar__list__item">
                     <img :src="item" alt="Avatar">
@@ -15,16 +15,17 @@
         <div class="info__details">
 
             <div class="info__details__name">
-                <input type="text" placeholder="Prénom" v-model="firstName">
+                <input class="neo-inverse" type="text" placeholder="Prénom" v-model="firstName">
 
                 <div class="info__details__name__avatar">
                     <img :src="avatar" alt="Avatar par défaut">
                     <div class="info__details__name__avatar__shadow"></div>
                 </div>
-                <input type="text" placeholder="Nom" v-model="lastName">
+
+                <input class="neo-inverse" type="text" placeholder="Nom" v-model="lastName">
             </div>
 
-            <input type="text" placeholder="Biographie" v-model="bio">
+            <input class="neo-inverse" type="text" placeholder="Biographie" v-model="bio">
 
             <button @click="updateInfo">{{buttonText}}</button>
         </div>
@@ -260,7 +261,7 @@ export default {
 
             button{
                 border-radius: 30px;
-                color: white;
+                color: $button-action-inner;
                 background-color: $button-action;
                 height: 50px;
                 width: 100%;
@@ -284,10 +285,8 @@ export default {
 
     input{
         margin: 20px 0;
-        background-color: white;
         text-align: center;
         border-radius: 30px;
-        box-shadow: $box-shadow-inner;
         width: 100%;
         height: 50px;
     }

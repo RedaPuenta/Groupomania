@@ -2,8 +2,8 @@
     <div> 
         <div :class="{media_small: small, media_big: big}" v-for="(item, index) in data" :key="index" :id="item.postId" class="neo media">
 
-            <div :class="{post_small: small, post_big: big}" name="mediaBlock" class="media__post">
-                <div class="media__post__shadow"></div>
+            <div class="media__titre">
+                <span>{{item.titre}}</span>
             </div>
 
             <div class="media__influence">
@@ -11,11 +11,11 @@
                 <div class="media__influence__button">
                     <button :class="{button_small: small, button_big: big}" name="buttonLikes" class="media__influence__button__item" :data-like="item.my_like" :data-id="item.postId">
                         <div @click.self="likePost" class="media__influence__button__item__self" :data-position="item.position"></div>
-                        <i class="fas fa-hand-spock fa-lg"></i> 
+                        <i class="fas fa-satellite fa-lg"></i> 
                     </button>
                     <router-link :class="{button_small: small}" v-if="focus == false" :to="{name: direction, params: {id: item.postId}, query: {comments: true, preference: preference}}">
                         <button name="buttonComments" :data-comments="item.my_comments" class="media__influence__button__item">
-                            <i class="fas fa-comment fa-lg"></i> 
+                            <i class="fas fa-comments fa-lg"></i> 
                         </button>
                     </router-link>
                     <div name="deletePost" :data-mypost="item.my_post" class="media__influence__button__delete">
@@ -34,18 +34,12 @@
                 <div class="media__influence__note">
                     <div>
                         <span name="totalLikes">{{item.likes}}</span> 
-                        <span> appréciations</span>
+                        <span> engouements</span>
                     </div>
-                    <span>{{item.comments}} commentaires</span>
+                    <span>{{item.comments}} réactions</span>
                 </div>
 
             </div>
-
-            <div class="media__legend">
-                <span class="media__author__text">{{item.legend}}</span>
-            </div>
-
-            <div class="media__titre">Commentaires</div>
 
             <div :class="{reaction_small: small, reaction_big: big}" class="media__reaction">
 
@@ -124,7 +118,7 @@ export default {
             
             const postId = event.target.dataset.id
             
-            this.$axios.delete(`/multimedia/post/${postId}`)
+            this.$axios.delete(`/agora/post/${postId}`)
             .then(() => {
                 document.location.reload()
             })
@@ -202,15 +196,14 @@ export default {
             const focus = this.focus
 
             if(focus == false){
-                return `/multimedia/recoverAll`
+                return `/agora/recoverAll`
             } else {
-                return `/multimedia/recoverOne`
+                return `/agora/recoverOne`
             }
 
         },
         //! Fonction qui permet de changer le corps des requêtes (selon la view --> props)
         apiBody: function(){
-
             const focus = this.focus
             const userId = localStorage.getItem("userId")
             const preference = this.preference
@@ -221,7 +214,6 @@ export default {
             } else {
                 return {userId: userId, postId: postId}
             }
-
         },
         //! Fonction qui permet d'activer ou de désactiver certaines "class" (selon la view --> props)
         buildClass: function(){
@@ -306,37 +298,6 @@ export default {
 
                     comments[i].removeChild(comments[i].children[1])
 
-                }
-                
-            }
-
-        },
-        //! Fonction qui permet de choisir les balises de fichiers <img> ou <vidéo> grâce aux keys "media" de la réponse API
-        buildBlockMedia: function(){
-
-            const typeImage = ["jpg", "png", "gif"]
-            const typeVideo = ["mp4"]
-
-            var data = this.data
-            var mediaBlock = document.getElementsByName("mediaBlock")
-
-            for (let i = 0; i < data.length; i++) {
-
-                if(typeImage.includes(data[i].media.substr(-3)) == true){
-                
-                    let img = document.createElement("img")
-                    img.setAttribute("alt", "Image de publication")
-                    img.setAttribute("style", `object-fit: cover; object-position: 50% 50%; width: 100%; height: 100%;`)
-                    img.setAttribute("src", data[i].media)
-                    mediaBlock[i].appendChild(img)
-
-                }  else if (typeVideo.includes(data[i].media.substr(-3)) == true) {
-                    let video = document.createElement("video")
-                    video.setAttribute("style", `object-fit: cover; object-position: 50% 50%; width: 100%; height: 100%;`)
-                    video.setAttribute("src", data[i].media)
-                    video.setAttribute("controls", "controls")
-                    video.setAttribute("preload", "metadata")
-                    mediaBlock[i].appendChild(video)
                 }
                 
             }
@@ -429,9 +390,6 @@ export default {
                 this.buildButtonDeleteComments()
             })
             .then(() => {
-                this.buildBlockMedia()
-            })
-            .then(() => {
                 this.buildBlockReaction()
             })
             .then(() => {
@@ -487,7 +445,7 @@ export default {
     }
 
     .media_small{
-        width: 500px;
+        width: 60%;
     }
 
     .media_big{
@@ -513,10 +471,22 @@ export default {
         overflow: hidden;
 
         &__titre{
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            font-size: rem(10px);
-            padding: 5px 0;
+            width: 100%;
+            height: 90px;
+            padding: 10px 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            span{
+                line-height: 1.2;
+                text-align: center;
+                width: 100%;
+                color: $color-primary;
+                text-shadow: 1px 1px black, -1px -1px white;
+                font-size: rem(23px);
+                font-weight: 900;
+            }
         }
 
         .post_small{
@@ -525,23 +495,6 @@ export default {
 
         .post_big{
             height: 400px
-        }
-        
-        &__post{
-            width: 100%;
-            overflow: hidden;
-            border-radius: 30px 30px 0 0;
-            position: relative;
-            
-            &__shadow{
-                width: 100%;
-                height: 100%;
-                position: absolute;
-                background-color: transparent;
-                border-radius: 30px 30px 0 0;
-                box-shadow: $box-shadow-image;
-            }
-
         }
 
         &__influence{
@@ -597,7 +550,7 @@ export default {
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    background-color: $button-action;
+                    background-color: black;
                     box-shadow: $box-shadow-button;
                     border-radius: 10px;
 
@@ -645,18 +598,6 @@ export default {
             }
         }
 
-        &__legend{
-            width: 100%;
-            background-color: $color-third;
-            box-shadow: $box-shadow-inner;
-            padding: 10px;
-            text-align: center;
-
-            &__text{
-                font-size: rem(12px);
-            }
-        }
-
         .reaction_small{
             height: 135px;
             border-radius: 0 0 30px 30px;
@@ -669,13 +610,13 @@ export default {
 
         &__reaction{
             width: 100%;
-            height: 100%;
             background-color: $color-third;
             box-shadow: $box-shadow-inner;
             padding: 10px 10px 0 10px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            
 
             &__view{
                 display: flex;

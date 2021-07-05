@@ -1,25 +1,25 @@
 <template>
-    <div class="multimedia">
-        <NavBar class="multimedia__navbar" mode='accueil'/>
-        <Publication :mode="'Multimedia'" @blur-control="updateBlur"/>
-        <div class="multimedia__contain" :class="{shadow: blur}">
-            <NavBack class="multimedia__contain__nav" :history="await_HistoryPostID" :preference="take_Preference" direction="Multimedia"/>
-            <Media class="multimedia__contain__media"  @preference="give_Preference" @history="update_HistoryPostID" :direction="'Multimedia'" :focus="true"/>
+    <div class="agora">
+        <NavBar class="agora__navbar" mode='accueil'/>
+        <Publication :mode="'Agora'" @blur-control="updateBlur"/>
+        <div class="agora__contain" :class="{shadow: blur}">
+            <NavBack class="agora__contain__nav" :history="await_HistoryPostID" :preference="take_Preference" direction="Agora"/>
+            <Forum class="agora__contain__media"  @preference="give_Preference" @history="update_HistoryPostID" :direction="'Agora'" :focus="true"/>
         </div>
     </div>
 </template>
 
 <script>
 import NavBack from '../components/NavBack.vue'
-import Media from '../components/Media.vue'
 import NavBar from '../components/NavBar.vue'
 import Publication from '../components/Publication.vue'
+import Forum from '../components/Forum.vue'
 
 export default {
-    name: "MultimediaID",
+    name: "AgoraID",
 
     components: {
-        Media, NavBack, NavBar, Publication
+        NavBack, NavBar, Publication,Forum
     },
 
     data: function(){
@@ -64,7 +64,7 @@ export default {
         filter: blur(20px);
     }
 
-    .multimedia{
+    .agora{
         display: flex;
         flex-direction: column;
         align-items: center;

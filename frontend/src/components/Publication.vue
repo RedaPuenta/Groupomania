@@ -1,9 +1,17 @@
 <template>
   <div class="media">
+
+        <!--- Bouton "Sortir" (Multimdédia/Agora) --->
         <div @click="toWrite" v-if="new_write == false" :class="{bg_multimedia: multimedia, bg_agora: agora}" class="neo media__new"></div>
+        
+        <!--- Bouton "Ecrire" (Multimédia/Agora) --->
         <div @click="toExit" v-if="new_write == true" class="neo media__exit"></div>
-        <div class="media__post">
-            <form v-if="new_write == true" :class="{write_multimedia: multimedia, write_agora: agora}" class="neo neo-relax media__post__write" enctype="multipart/form-data"> 
+        
+        <!--- Partie Construction du Post --->
+        <div :class="{post_active: new_write}" class="media__post">
+            <form v-if="new_write == true" class="neo neo-relax media__post__write" enctype="multipart/form-data"> 
+                
+                <!--- Image/Vidéo (Multimédia) --->
                 <div v-if="multimedia == true" class="media__post__write__view">
                     <div class="media__post__write__view__shadow"></div>
                     <img v-if="fileExe == false" class="media__post__write__view__default" src="../assets/upload.png" alt="Image de téléchargement"/>
@@ -11,18 +19,29 @@
                     <video v-if="fileExe == true && fileExeType == 'video'" class="media__post__write__view__file" ref="mediaVideo" autoplay muted loop src="#"></video>
                     <img v-if="fileExe == true && fileExeType == 'loading'" class="media__post__write__view__file" src="../assets/loading.gif" alt="Votre fichier"/>
                 </div>
+
+                <!--- Bouton "Charger le fichier" (Multimédia) --->
                 <div v-if="multimedia == true" class="media__post__write__control">
-                    <div v-if="upload == false" class="media__post__write__control__upload"> 
+                    <div v-if="fileExe == false" class="media__post__write__control__upload"> 
                         <label class="media__post__write__control__upload--label" for="file">Choisir un fichier</label>
                         <input class="media__post__write__control__upload--input" type="file" ref="fileMedia" @change="controlFile" id="file" name="file">
                     </div>
-                    <button v-if="upload == true" @click="cancelUpload">Changer de fichier</button>
+                    <button v-if="fileExe == true" @click="cancelUpload">Changer de fichier</button>
                 </div>
+                
+                <!--- Champ "Ecrire une légende" (Multimédia) --->
                 <textarea v-if="multimedia == true" v-model="legend" class="media__post__write__publication" name="legend" rows="3" placeholder="Ecrivez votre légende ..."></textarea>
+                
+                <!--- Champ "Ecrire un titre" (Agora) --->
                 <textarea v-if="agora == true" v-model="titre" class="media__post__write__publication publication-agora" name="titre" rows="5" placeholder="Ecrivez votre sujet ..."></textarea>
+                
+                <!--- Bouton de soumission (Multimédia/Agora) --->
                 <button @click="newPost" v-if="stopSend == false" class="media__post__write__submit" type="button">{{textButton}}</button>
                 <button v-if="stopSend == true" class="media__post__write__submit" type="button">{{textButton}}</button>
+                
+                <!--- Partie Erreur (Multimédia/Agora) --->
                 <div class="media__post__write__error">
+                    <!--- Composant Error (pour les erreurs) --->
                     <Error/>
                 </div>
             </form>
@@ -41,50 +60,56 @@ export default {
     },
 
     props: {
+        //! Propriété qui permet de décidé du type d'affichage (Multimédia/Agora)
         mode: {type: String, required: true}
     }, 
 
     data: function(){
         return{
+            //! Variable qui indique si la fenêtre de publication a été ouverte par l'utilisateur
             new_write: false,
+            //! Emsemble de variable qui contiennent les informations du visiteur dans le formulaire
             file: "",
             legend: "",
             titre: "",
+            //! Variable qui contient le texte du bouton de publication (par défaut = "Publier")
             textButton: "Publier",
-            upload: false,
+            //! Variable qui indique si un fichier a été chargée par l'utilisateur
             fileExe: false,
+            //! Variable qui indique le type de fichier qui a été chargée par l'utilisateur
             fileExeType: "",
+            //! Variable qui permet d'ajouter ou d'enlever l'évènement de soumission du formulaire (Sécurité)
             stopSend: false,
+            //! Ensemble de variable qui permet de contrôler l'affichage
             multimedia: false, 
             agora: false
         }
     },
 
     methods: {
-        toWrite: function(){
+        //! Fonction qui réinitialise toutes les variables
+        dataReset: function(){
             this.$store.commit("DESACTIVE_ERROR")
             this.stopSend = false
-            this.new_write = true
             this.textButton = "Publier"
-            this.upload = false
             this.fileExe = false
             this.file = ""
             this.legend = ""
             this.titre = ""
+        },
+        //! Fonction qui réinitialise toutes les variables et passe en mode "écriture"
+        toWrite: function(){
+            this.dataReset()
+            this.new_write = true
             this.$emit('blur-control', {blur: true})
         },
+        //! Fonction qui réinitialise toutes les variables et passe en mode "sortie"
         toExit: function(){
-            this.$store.commit("DESACTIVE_ERROR")
-            this.stopSend = false
+            this.dataReset()
             this.new_write = false
-            this.textButton = "Publier"
-            this.upload = false
-            this.fileExe = false
-            this.file = ""
-            this.legend = ""
-            this.titre = ""
             this.$emit('blur-control', {blur: false})
         },
+        //! Fonction qui permet de pré-afficher le fichier qui a été chargé
         controlFile: async function(event){
 
             const typeValid = ["image/jpeg", "image/jpg", "image/png", "image/gif", "video/mp4"]
@@ -107,8 +132,6 @@ export default {
                     const blockMedia = await this.$refs.mediaImage
                     blockMedia.src = await URL.createObjectURL(fileMedia)
                     
-                    this.upload = await true
-
                 } else {
 
                     this.fileExeType = await 'video'
@@ -117,17 +140,17 @@ export default {
                     const fileMedia = await event.target.files[0]
                     const blockMedia = await this.$refs.mediaVideo
                     blockMedia.src = await URL.createObjectURL(fileMedia)
-                    
-                    this.upload = await true
 
                 }
             }
         },
+        //! Fonction qui permet de réinitialiser certaines variables quand le bouton "changer le fichier" a été engagé
         cancelUpload: function(){
             this.upload = false
             this.fileExe = false
             this.file = ""
         },
+        //! Fonction qui permet de changer l'adresse des requêtes (selon la view --> Props MODE)
         getApi: function(){
 
             if(this.multimedia == true) {
@@ -140,6 +163,7 @@ export default {
             }
 
         },
+        //! Fonction qui permet de changer le corps des requêtes (selon la view --> props MODE)
         getBody: function(){
 
             const userId = localStorage.getItem("userId")
@@ -150,7 +174,7 @@ export default {
                 formData.append('file', this.file)
                 formData.append('legend', this.legend)
                 formData.append('userId', userId)
-                console.log(formData)
+        
                return formData
 
             } else if (this.agora == true) {
@@ -160,6 +184,7 @@ export default {
             }
 
         },
+        //! Fonction qui permet de changer l'en tête des requêtes (selon la view --> props FOCUS)
         getHeaders: function(){
 
             if(this.multimedia == true) {
@@ -173,6 +198,7 @@ export default {
             }
 
         },
+        //! Fonction qui permet de publier un contenu
         newPost: function(){
             
             if(localStorage.getItem("token") !== null && localStorage.getItem("userId") !== null){
@@ -218,16 +244,14 @@ export default {
         }
     },
 
+    //! Une fois que la page est monté ...
     mounted: function(){
-
+    
+        //! On change l'état des variables responsables de l'affichage
         if(this.mode == 'Agora') {
-
             this.agora = true
-
         } else if(this.mode == 'Multimedia'){
-
             this.multimedia = true
-
         }
 
     }
@@ -237,7 +261,10 @@ export default {
 
 <style lang="scss" scoped>
 
+    // Ensemble des variables globales (SASS)
     @import "../sass/global.scss";
+
+    $step-1: 1000px;
 
     .media{ 
         width: 100%;
@@ -264,6 +291,18 @@ export default {
             right: 30px;
             z-index: 3;
             border-radius: 20px;
+            @media screen and (max-width: $step-1) {
+                height: 65px;
+                width: 65px;
+                right: 20px;
+                bottom: 20px;
+                border-radius: 15px;
+            }
+            @media screen and (max-width: $step-0) {
+                height: 55px;
+                width: 55px;
+                border-radius: 10px;
+            }
         }
 
         &__exit{
@@ -276,7 +315,23 @@ export default {
             right: 30px;
             z-index: 3;
             border-radius: 20px;
+            @media screen and (max-width: $step-1) {
+                height: 65px;
+                width: 65px;
+                right: 20px;
+                bottom: 20px;
+                border-radius: 15px;
+            }
+            @media screen and (max-width: $step-0) {
+                height: 55px;
+                width: 55px;
+                border-radius: 10px;
+            }
         }
+
+        .post_active{
+            height: calc(100vh - 130px);
+        }   
 
         &__post{
             width: 100%;
@@ -285,22 +340,18 @@ export default {
             align-items: center;
             justify-content: center;
             position: fixed;
-            z-index: 3;
-
-            .write_agora{
-                margin-top: 30vh;
-            }
-
-            .write_multimedia{
-                margin-top: 10vh;
-            }
-
+            z-index: 2;
+            
             &__write{
                 padding: 10px;
                 display: block;
                 width: 500px;
                 overflow: hidden;
-                border-radius: 20px!important;
+                border-radius: 30px!important;
+                @media screen and (max-width: $step-0) {
+                    width: 90%;
+                    padding: 5px;
+                }
 
                 &__view{
                     height: 250px;
@@ -309,6 +360,9 @@ export default {
                     display: flex;
                     justify-content: center;
                     align-items: center;
+                    @media screen and (max-width: $step-0) {
+                        height: 180px;
+                    }
 
                     &__shadow{
                         width: 100%;
@@ -389,7 +443,7 @@ export default {
                 }
 
                 .publication-agora{
-                    border-radius: 10px 10px 0 0;
+                    border-radius: 30px 30px 0 0;
                 }
             
                 &__publication{

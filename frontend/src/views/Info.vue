@@ -1,8 +1,11 @@
 <template>
+<div class="center">
   <div class="info">
 
+        <!---- Titre ---->
         <h1 class="info__titre">Compléter vos informations</h1>
 
+        <!---- Liste des avatars ---->
         <div class="neo-inverse info__avatar">
             <div class="info__avatar__list">
                 <div v-for="(item, index) in list_avatar" :key="index" class="info__avatar__list__item">
@@ -15,28 +18,37 @@
         <div class="info__details">
 
             <div class="info__details__name">
+
+                <!---- Champ "Prénom" ---->
                 <input class="neo-inverse" type="text" placeholder="Prénom" v-model="firstName">
 
+                <!---- Avatar de l'utilisateur ---->
                 <div class="info__details__name__avatar">
                     <img :src="avatar" alt="Avatar par défaut">
                     <div class="info__details__name__avatar__shadow"></div>
                 </div>
 
+                <!---- Champ "Nom" ---->
                 <input class="neo-inverse" type="text" placeholder="Nom" v-model="lastName">
             </div>
 
-            <input class="neo-inverse" type="text" placeholder="Biographie" v-model="bio">
+            <!---- Champ Biographie ---->
+            <textarea class="neo-inverse" rows="4" placeholder="Biographie" v-model="bio"></textarea>
 
+            <!---- Bouton de soumission ---->
             <button @click="updateInfo">{{buttonText}}</button>
         </div>
 
+        <!---- Composant Erreur (si il y a des erreurs) ---->
         <Error/>
         
+        <!---- Lien de retour à l'accueil ---->
         <router-link class="info__after" :to="{name: 'Multimedia'}">
             <span>Je ferais ça plus tard</span>
         </router-link>
     
     </div>
+</div>
 </template>
 
 <script>
@@ -51,19 +63,24 @@ export default {
 
     data: function(){
         return {
+            //! Variable qui contient la liste des avatars que l'utilisateur peut choisir
             list_avatar: [],
+            //! Emsemble de variable qui contiennent les informations de l'utilisateur dans le formulaire
             bio: "",
             firstName: "",
             lastName: "",  
             avatar: "",
+            //! Variable qui contient le texte du bouton de soumission
             buttonText: "Enrengistrer et continuer"
         }
     },  
 
     methods: {
+        //! Fonction qui pré-affiche l'avatar choisie par l'utilisateur
         getAvatar: function(event){
             this.avatar = event.target.dataset.avatar
         },
+        //! Fonction qui permet à l'utilisateur de modifier ses informations
         updateInfo: function(){
 
             const avatar = this.avatar
@@ -93,13 +110,20 @@ export default {
         }
     },
 
+
+    //! Avant la création de la page ...
     beforeCreate: function(){
+        //! On exécute la fonction qui permet d'autorisé un visiteur d'accéder aux pages du site
         this.$store.dispatch('accessPage')
     },
 
+    //! Une fois que la page est monté ...
     mounted: function(){
+
+        //! On exécute la fonction Neo
         this.$store.dispatch('neo')
 
+        //! On récupère la liste d'avatar et les informations de l'utilisateur
         this.$axios.get(`/asset/avatar`)
         .then((response) => {
             console.log(response)
@@ -126,7 +150,10 @@ export default {
         })
     },
 
+    //! Quand la  page est mise à jour ...
     updated: function(){
+
+        //! On apllique le rendu de la fonction Neo
         this.$store.dispatch('neo')
     }
 }
@@ -134,14 +161,30 @@ export default {
 
 <style lang="scss" scoped>
 
+    // Ensemble des variables globales (SASS)
     @import "../sass/global.scss";
 
+    // Check-point @media
+    $step-1: 1050px;
+    $step-2: 700px;
+
+    .center{
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     .info{
-        margin-top: 50px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        width: 80%;
+        @media screen and (max-width: $step-1){
+            width: 90%;
+        }
 
         &__titre{
             padding: 15px;
@@ -150,6 +193,10 @@ export default {
             font-weight: bold;
             color: black;
             position: relative;
+            text-align: center;
+            @media screen and (max-width: $step-2){
+                font-size: rem(25px);
+            }
         }
 
         
@@ -160,15 +207,17 @@ export default {
             bottom: 0;
             left: 0;
             background-color: rgb(59, 59, 59);
-            width: 70%;
             height: 2px;
             margin: auto;
         }
         
         &__avatar{
-            width: 70%;
+            width: 100%;
             height: 130px;
             overflow-x: scroll;
+            @media screen and (max-width: $step-2){
+                height: 100%;
+            }
 
             &__list{
                 padding: 15px;
@@ -190,11 +239,19 @@ export default {
                     margin: 0 10px;
                     cursor: pointer;
                     transition: transform 0.4s ease-in-out, filter 0.4s ease-in-out;
+                    @media screen and (max-width: $step-2){
+                        height: 60px;
+                        width: 60px;
+                    }
 
                     img{
                         height: 80px;
                         width: 80px;
                         border-radius: 100%;
+                        @media screen and (max-width: $step-2){
+                            height: 60px;
+                            width: 60px;
+                        }
                     }
 
                     &__shadow{
@@ -213,7 +270,7 @@ export default {
         }
 
         &__details{
-            width: 70%;
+            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -235,11 +292,19 @@ export default {
                     position: relative;
                     width: 120px;
                     height: 120px;
+                    @media screen and (max-width: $step-2){
+                        width: 80px;
+                        height: 80px;
+                    }
 
                     img{
                         width: 120px;
                         height: 120px;
                         border-radius: 100%;
+                        @media screen and (max-width: $step-2){
+                            width: 80px;
+                            height: 80px;
+                        }
                     }
 
                     &__shadow{
@@ -268,6 +333,9 @@ export default {
                 margin: 20px 0;
                 box-shadow: $box-shadow-button;
                 cursor: pointer;
+                @media screen and (max-width: $step-2){
+                    height: 45px;
+                }
             }
         }
 
@@ -283,24 +351,45 @@ export default {
         
     }
 
-    input{
+    input, textarea{
         margin: 20px 0;
         text-align: center;
-        border-radius: 30px;
         width: 100%;
+    }
+
+    input{
+        border-radius: 30px;
         height: 50px;
+        @media screen and (max-width: $step-2){
+            height: 45px;
+        }
+    }
+
+    textarea{
+        border-radius: 10px;
+        padding: 15px 5px;
+        resize: none;
+        background-color: $color-secondary;
     }
 
     ::-webkit-scrollbar{
         width: 5px;
         height: 8px;
+        @media screen and (max-width: $step-2){
+            height: 5px;
+        }
     }
 
-    ::-webkit-scrollbar-track{
+    textarea::-webkit-scrollbar-thumb{
+        background-color: rgb(0, 0, 0);
+        border-radius: 0 10px 10px 0;
+    }
+
+    .info__avatar::-webkit-scrollbar-track{
         background-color: rgba(255, 255, 255, 0.445);
     }
 
-    ::-webkit-scrollbar-thumb{
+    .info__avatar::-webkit-scrollbar-thumb{
         background-color: rgb(0, 0, 0);
     }
 

@@ -42,17 +42,17 @@ exports.friends = (req, res, next)  => {
     //* On récupère dans la base de données des informations sur tout les autres utilisateurs (sauf celui qui demande)
     //* Avatar, prénom, nom, bio + nombre de contenu "agora" et "multimedia"
     db.query(`
-        SELECT COUNT(forum.postId) As forum, user_media.userId, user_media.multimedia, user_media.firstName, user_media.lastName, user_media.avatar, user_media.bio, user_media.dateCreation FROM (
-            SELECT COUNT(multimedia.postId) AS multimedia, user.userId, user.firstName, user.lastName, user.avatar, user.bio, user.dateCreation 
+        SELECT req1.*, COUNT(forum.postId) As forum FROM (
+            SELECT user.*, COUNT(multimedia.postId) AS multimedia
             FROM user
             LEFT JOIN multimedia
             ON multimedia.userId = user.userId
             GROUP BY user.userId
-        ) AS user_media
+        ) AS req1
         LEFT JOIN forum
-        ON forum.userId = user_media.userId
-        WHERE user_media.userId != ?
-        GROUP BY user_media.userId`, 
+        ON forum.userId = req1.userId
+        WHERE req1.userId != ?
+        GROUP BY req1.userId`, 
         [userId],
         function(error, results, fields){
 
@@ -81,24 +81,24 @@ exports.profil = (req, res, next)  => {
     //* On récupère dans la base de données des informations sur l'utilisateur ciblées
     //* Avatar, prénom, nom, bio + nombre de contenu "agora" et "multimedia" + nombre de "like" et de "commentaire" 
     db.query(`
-        SELECT COUNT(comments.userId) AS likes, score_comments.* FROM (
-            SELECT COUNT(likes.userId) AS comments, score_likes.* FROM (
-                SELECT COUNT(forum.postId) As forum, user_media.multimedia, user_media.userId, user_media.firstName, user_media.lastName, user_media.avatar, user_media.bio, user_media.dateCreation FROM (
-                    SELECT COUNT(multimedia.postId) AS multimedia, user.userId, user.firstName, user.lastName, user.avatar, user.bio, user.dateCreation 
+        SELECT req3.*, COUNT(comments.userId) AS likes FROM (
+            SELECT req2.*, COUNT(likes.userId) AS comments FROM (
+                SELECT req1.*, COUNT(forum.postId) As forum FROM (
+                    SELECT user.*, COUNT(multimedia.postId) AS multimedia
                     FROM user
                     LEFT JOIN multimedia
                     ON multimedia.userId = user.userId
                     GROUP BY user.userId
-                ) AS user_media
+                ) AS req1
                 LEFT JOIN forum
-                ON forum.userId = user_media.userId
-                WHERE user_media.userId = ?
-            ) AS score_likes
+                ON forum.userId = req1.userId
+                WHERE req1.userId = ?
+            ) AS req2
             LEFT JOIN likes
-            ON likes.userId = score_likes.userId
-            ) AS score_comments
+            ON likes.userId = req2.userId
+            ) AS req3
             LEFT JOIN comments
-            ON comments.userId = score_comments.userId`, 
+            ON comments.userId = req3.userId`, 
         [userId],
         function(error, results, fields){
 
@@ -116,16 +116,18 @@ exports.profil = (req, res, next)  => {
                 //* On envoie une réponse de succès
                 //* avatar, nom, prénom, bio + nombre de contenu "agora" et "multimedia" + score de "réaction" et de "participation"
                 res.status(200).json(
-                    {
-                    score_reaction: score_reaction, 
-                    score_participation: score_participation,
-                    avatar: results[0].avatar,
-                    firstName: results[0].firstName,
-                    lastName: results[0].lastName,
-                    multimedia: results[0].multimedia,
-                    agora: results[0].forum,
-                    bio: results[0].bio
-                    }
+                    [
+                        {
+                            score_reaction: score_reaction, 
+                            score_participation: score_participation,
+                            avatar: results[0].avatar,
+                            firstName: results[0].firstName,
+                            lastName: results[0].lastName,
+                            multimedia: results[0].multimedia,
+                            forum: results[0].forum,
+                            bio: results[0].bio
+                        }
+                    ]
                 )
             
             //: Gestion des erreurs

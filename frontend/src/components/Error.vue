@@ -1,10 +1,12 @@
 <template>
     <div class="error" v-if="errorAlert == true">
         <div class="error_restrict">
+            <!---- Bouton pour masquer l'erreur ----->
             <div @click="quitError" class="error__restrict__icon">
                 <i class="error__restrict__icon--croix fas fa-times"></i>
             </div> 
         </div>
+        <!---- Message d'erreur ----->
         <span class="error__text">{{errorText}}</span>
     </div>
 </template>
@@ -23,6 +25,7 @@ export default {
     },
     
     methods: {
+        //! Fonction qui permet de masquer l'erreur
         quitError: function(){
             this.$store.commit("DESACTIVE_ERROR")
         }
@@ -42,6 +45,7 @@ export default {
         justify-content: center;
         align-items: center;
         text-align: center;
+        filter: brightness(1.1);
 
         &__restrict{
 
@@ -54,13 +58,21 @@ export default {
                 width: 23px;
                 background-color: $color-error;
                 margin-right: 8px;
-                box-shadow: $box-shadow-button;
+                box-shadow: 
+                1px 1px 2px white, 
+                -1px -1px 2px white, 
+                inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.5), 
+                inset -0.5px -0.5px 1px rgba(255, 255, 255, 0.5);
                 cursor: pointer;
 
                 &--croix{
                     color: white;
                 }
             }
+        }
+
+        &__text{
+            text-shadow: 0.5px 0.5px rgb(255, 255, 255), -0.5px -0.5px rgb(255, 255, 255);
         }
     }
 

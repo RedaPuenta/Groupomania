@@ -1,72 +1,98 @@
 <template>
     <div> 
+        <!---- Un post ---->
         <div :class="{media_small: small, media_big: big}" v-for="(item, index) in data" :key="index" :id="item.postId" class="neo media">
+            
+            <!---- Bouton "Supprimer le post" (Scroll/Focus) ---->
+            <div class="media__edit">
+                <div class="media__edit__more" name="deletePost" :data-mypost="item.my_post"></div>
+                <div class="media__edit__self" name="deletePost" :data-mypost="item.my_post" data-active="false" @click.self="toggleButtonDelete"></div>
+                <div class="media__edit__delete">
+                    <div @click.self="deletePost" :data-id="item.postId" class="media__edit__delete__self"></div>
+                    <i class="fas fa-trash-alt fa-lg"></i>
+                </div>
+            </div>
 
+            <!---- Partie Image/Vidéo (Scroll/Focus) ---->
             <div :class="{post_small: small, post_big: big}" name="mediaBlock" class="media__post">
                 <div class="media__post__shadow"></div>
             </div>
 
             <div class="media__influence">
-
+                
                 <div class="media__influence__button">
+
+                    <!---- Bouton "Like" (Scroll/Focus) ---->
                     <button :class="{button_small: small, button_big: big}" name="buttonLikes" class="media__influence__button__item" :data-like="item.my_like" :data-id="item.postId">
                         <div @click.self="likePost" class="media__influence__button__item__self" :data-position="item.position"></div>
-                        <i class="fas fa-hand-spock fa-lg"></i> 
+                        <i class="media__influence__button__item__icon fas fa-hand-spock fa-lg"></i> 
                     </button>
+
+                    <!---- Bouton "Commenter" (Scroll) ---->
                     <router-link :class="{button_small: small}" v-if="focus == false" :to="{name: direction, params: {id: item.postId}, query: {comments: true, preference: preference}}">
                         <button name="buttonComments" :data-comments="item.my_comments" class="media__influence__button__item">
-                            <i class="fas fa-comment fa-lg"></i> 
+                            <i class="media__influence__button__item__icon fas fa-comment fa-lg"></i> 
                         </button>
                     </router-link>
-                    <div name="deletePost" :data-mypost="item.my_post" class="media__influence__button__delete">
-                        <div @click.self="deletePost" :data-id="item.postId" class="media__influence__button__delete__self"></div>
-                        <i class="media__influence__button__delete__icon fas fa-trash-alt fa-lg"></i>
-                    </div>
+                    
                 </div>
-                
+                 
+                <!---- Bouton "Voir le profil de l'auteur" (Scroll/Focus) ---->
                 <router-link :to="{name: 'Profil', params: {id: item.userId}}">
                     <div class="media__influence__author">
                         <img class="avatar" :src="item.avatar" alt="Avatar de profil">
                         <span class="media__influence__author__name">{{item.firstName}}.{{item.lastName}}</span>
-                    </div>
+                    </div>  
                 </router-link>
 
+                <!---- Les scores du post (Scroll/Focus) ---->
                 <div class="media__influence__note">
-                    <div>
-                        <span name="totalLikes">{{item.likes}}</span> 
-                        <span> appréciations</span>
+                    <div class="media__influence__note__item">
+                        <div class="media__influence__note__item__text">
+                            <span name="totalLikes">{{item.likes}}</span> 
+                            <span> appréciations</span>
+                        </div>
+                        <span class="media__influence__note__item__text">{{item.comments}} commentaires</span>
                     </div>
-                    <span>{{item.comments}} commentaires</span>
                 </div>
 
             </div>
 
+            <!---- Partie Légende (Scroll/Focus) ---->
             <div class="media__legend">
                 <span class="media__author__text">{{item.legend}}</span>
             </div>
 
             <div class="media__titre">Commentaires</div>
 
+            <!---- Partie Commentaires (Scroll/Focus) ---->
             <div :class="{reaction_small: small, reaction_big: big}" class="media__reaction">
 
                 <div id="reaction" name="reactionBlock">
+
+                    <!---- Un commentaire ---->
                     <div name="comments" v-for="(comments, indexList) in item.commentsList" :key="indexList" :data-commentsId="comments.commentsId" :data-myComments="comments.my_comments" class="media__reaction__view">
                         <div :class="{comments_small: small, comments_big: big}" class="media__reaction__view__comments">   
+                            <!---- Auteur ---->
                             <div class="media__reaction__view__comments__name">
                                 <img class="avatar" :src="comments.avatar" alt="Avatar de profil">
                                 <span class="media__reaction__view__comments__name--user">{{comments.firstName}}.{{comments.lastName}} :</span>
                             </div>
+                            <!---- Message ---->
                             <span :class="{phrase_small: small}" class="media__reaction__view__comments__phrase">{{comments.reaction}}</span>
                         </div>
                         <div>
+                            <!---- Bouton "supprimer commentaire" ---->
                             <button class="media__reaction__view__delete">
                                 <div @click="deleteComments" class="media__reaction__view__delete__self" :data-commentsId="comments.commentsId"></div>
                                 <i class="media__reaction__view__delete__icon fas fa-trash-alt fa-sm"></i>
                             </button>
                         </div>
                     </div>
+
                 </div>
                 
+                <!---- Bouton "Voir plus" (Scroll) ---->
                 <router-link v-if="focus == false" :to="{name: direction, params: {id: item.postId}, query: {comments: false, preference: preference}}" class="media__reaction__more">
                     <button class="media__reaction__more__button">
                         <i class="fas fa-caret-down"></i>
@@ -74,9 +100,10 @@
                 </router-link>
                 
             </div>
-
+            
             <div v-if="focus == true" class="media__titre">Mon commentaire</div>
 
+            <!---- Partie "Ecrire un commentaire" (Focus) ---->
             <form v-if="focus == true" @submit.prevent="commentPost" class="media__write">
                 <textarea name="textArea" v-model="comments" rows="2"></textarea>
                 <button type="submit">
@@ -84,10 +111,11 @@
                 </button>
             </form>
 
+            <!---- Partie Erreur (Focus) ---->
             <div v-if="focus == true" class="media__error">
+                <!--- Composant Error (pour les erreurs) --->
                 <Error/>
             </div>  
-
 
         </div>
     </div>
@@ -105,20 +133,38 @@ export default {
 
     data: function(){
         return{
+            //! Variable qui contient l'ensemble des posts
             data: [],
+            //! Ensemble de variables qui décide du type d'affichage (Scroll et Focus)
             small: false,
             big: false,
+            //! Variable qui contient le commentaire du visiteur dans le formulaire
             comments: ""
         }
     },
 
     props: {
+        //! Propriété qui permet de donner des adresses aux différents liens (AgoraID ou MultimediaID)
         direction : {type: String, required: true},
+        //! Propriété qui permet de déterminer la requête API dans la récupération des posts et le type d'affichage du post
         focus: {type: Boolean, required: true},
+        //! Propriété qui permet de savoir où l'utilisateur était quand il a cliqué sur le bouton "commenter" ou "voir plus" 
         preference: {type: Number}
     },
 
     methods: {
+        //! Fonction qui permet de faire apparaître/disparaître le toggle du bouton de suppression de post
+        toggleButtonDelete: function(event){
+
+            if(event.target.dataset.active == "false"){
+                event.target.parentElement.children[2].style.display = "flex"
+                event.target.dataset.active = "true"
+            } else if(event.target.dataset.active == "true"){
+                event.target.parentElement.children[2].style.display = "none"
+                event.target.dataset.active = "false"
+            }
+            
+        },
         //! Fonction qui permet de supprimer un post
         deletePost: function(event){
             
@@ -197,7 +243,7 @@ export default {
                 this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)
             })
         },
-        //! Fonction qui permet de changer l'adresse des requêtes (selon la view --> props)
+        //! Fonction qui permet de changer l'adresse des requêtes (selon la view --> props FOCUS)
         apiAdresse: function(){
             const focus = this.focus
 
@@ -208,7 +254,7 @@ export default {
             }
 
         },
-        //! Fonction qui permet de changer le corps des requêtes (selon la view --> props)
+        //! Fonction qui permet de changer le corps des requêtes (selon la view --> props FOCUS)
         apiBody: function(){
 
             const focus = this.focus
@@ -223,7 +269,7 @@ export default {
             }
 
         },
-        //! Fonction qui permet d'activer ou de désactiver certaines "class" (selon la view --> props)
+        //! Fonction qui permet d'activer ou de désactiver certaines "class" (selon la view --> props FOCUS)
         buildClass: function(){
             const focus = this.focus
 
@@ -366,7 +412,7 @@ export default {
             }
 
         },
-        //! Fonction qui permet d'utiliser des comportements de direction par rapport aux paramètres des url (selon la view --> props)
+        //! Fonction qui permet d'utiliser des comportements de direction par rapport aux paramètres des url (selon la view --> props FOCUS)
         buildHistory: function(){
             const focus = this.focus
             
@@ -443,18 +489,33 @@ export default {
         }
     },   
 
+    //! Quand la propriété  ...
     watch: {
+        //! "Préférence" change ...
         preference: function(){
+
+            //! On supprime tout les posts
             this.data = []
+        
+            //! On applique le rendu de l'affichage des posts
             this.RENDU_MONTAGE_FONCTION()
         }
     },
     
+    //! Quand la page est monté ...
     mounted: function(){
+
+        //! On applique le rendu de l'affichage des posts
         this.RENDU_MONTAGE_FONCTION()
+
+        //! On apllique le rendu de la fonction Neo
+        this.$store.dispatch('neo')
     },
 
+    //! Quand la  page est mise à jour ...
     updated: function(){
+
+        //! On apllique le rendu de la fonction Neo
         this.$store.dispatch('neo')
     }
 }
@@ -462,7 +523,15 @@ export default {
 
 <style lang="scss" scoped>
 
+    // Ensemble des variables globales (SASS)
     @import "../sass/global.scss";
+
+    // Checkpoint @media
+    $step-1: 1000px;
+
+    .media__edit:hover .media__edit__more{
+        background-color: white;
+    }
 
     .avatar{
         border-radius: 100%;
@@ -488,10 +557,26 @@ export default {
 
     .media_small{
         width: 500px;
+        margin: 40px;
+        padding: 0 10px 10px 10px;
+        @media screen and (max-width: $step-0) {
+            margin: 40px 10px;
+            width: 100%;
+        }
     }
 
     .media_big{
-        width: 60vw;
+        margin: 40px;
+        width: 70%;
+        padding: 0 10px;
+        @media screen and (max-width: $step-1) {
+            width: 100%;
+            margin: 40px 30px 60px 30px;
+        }
+        @media screen and (max-width: $step-0) {
+            width: 100%;
+            margin: 40px 10px 60px 10px;
+        }
     }
 
     .media-style{
@@ -502,15 +587,68 @@ export default {
     }
 
     .media{
-        margin: 40px;
         display: flex;
         flex-direction: column;
         align-items: center;
         border-radius: 30px;
-        padding: 10px;
         position: relative;
         z-index: 1;
         overflow: hidden;
+
+        &__edit{
+            height: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+
+            &__more{
+                background-color: rgba(0, 0, 0, 0.65);
+                height: 6px;
+                width: 100px;
+                border-radius: 5px;
+                margin-top: 1px;
+                transition: background-color 0.6s ease-in-out;
+            }
+
+            &__self{
+                position: absolute;
+                height: 100%;
+                width: 100%;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+
+            &__delete{
+                display: none;
+                position: absolute;
+                top: 15px;
+                right: auto;
+                left: auto;
+                background-color: rgb(0, 0, 0);
+                color: rgb(255, 0, 0);
+                border-radius: 10px;
+                padding: 6px 15px;
+                text-align: center;
+                box-shadow: $box-shadow-button;
+                cursor: pointer;
+                overflow: hidden;
+
+                &__self{
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    left: 0;
+                    bottom: 0;
+                    height: 100%;
+                    width: 100%;
+                }
+            }
+        }
 
         &__titre{
             text-transform: uppercase;
@@ -521,10 +659,19 @@ export default {
 
         .post_small{
             height: 200px;
+            @media screen and (max-width: $step-0) {
+                height: 170px;
+            }
         }
 
         .post_big{
-            height: 400px
+            height: 370px;
+            @media screen and (max-width: $step-1) {
+                height: 300px;
+            }
+            @media screen and (max-width: $step-0) {
+                height: 250px;
+            }
         }
         
         &__post{
@@ -550,6 +697,9 @@ export default {
             justify-content: space-between;
             align-items: center;
             padding: 15px 10px 15px 5px;
+            @media screen and(max-width: $step-0){
+                padding: 15px 5px 15px 0px;
+            }
             
 
             .button_small{
@@ -563,9 +713,10 @@ export default {
 
             &__button{ 
                 display: flex;
-                justify-content: center;
+                justify-content: flex-start;
                 align-items: center;
                 position: relative;
+                flex: 1;
             
                 &__item{
                     background-color: $button-action;
@@ -575,6 +726,10 @@ export default {
                     cursor: pointer;
                     box-shadow: $box-shadow-button;
                     position: relative;
+                    @media screen and(max-width: $step-0){
+                        height: 35px;
+                        width: 35px;
+                    }
 
                     &__self{
                         position: absolute;
@@ -586,33 +741,12 @@ export default {
                         bottom: 0;
                     }
 
-                }
-
-                &__delete{
-                    position: absolute;
-                    height: 40px;
-                    width: 40px;
-                    right: -45px;
-                    cursor: pointer;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    background-color: $button-action;
-                    box-shadow: $box-shadow-button;
-                    border-radius: 10px;
-
-                    &__self{
-                        position: absolute;
-                        height: 100%;
-                        width: 100%;
-                        z-index: 2;
-                    }
-
                     &__icon{
-                        z-index: 0;
-                        position: relative;
-                        color: red;
+                        @media screen and (max-width: $step-0){
+                            font-size: rem(20px);
+                        }
                     }
+
                 }
             }
 
@@ -623,6 +757,7 @@ export default {
                 display: flex;
                 align-items: center;
                 background-color: $button-action;
+                flex: 1;
                 
                 &__name{
                     color: $button-action-false;
@@ -637,11 +772,24 @@ export default {
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
-                align-items: center;
+                align-items: flex-end;
+                flex: 1;
 
-                span{
-                    font-size: rem(12px);
+                &__item{
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+
+                    &__text:nth-child(1){
+                        margin-bottom: 1px;
+                    }
+
+                    span{
+                        font-size: rem(12px);
+                    }
                 }
+            
             }
         }
 
@@ -663,7 +811,7 @@ export default {
         }
 
         .reaction_big{
-            height: 200px;
+            height: 180px;
             overflow-x: scroll;
         }
 
@@ -777,6 +925,7 @@ export default {
 
         &__write{
             display: flex;
+            flex-direction: row-reverse;
             align-items: center;
             width: 100%;
 
@@ -785,7 +934,7 @@ export default {
                 width: 100%;
                 padding: 10px 15px 15px 15px;
                 box-shadow: $box-shadow-inner;
-                border-radius: 0 0 0 20px;
+                border-radius: 0 0 20px 0;
                 background-color: $color-third;
             }
 
@@ -793,7 +942,7 @@ export default {
                 cursor: pointer;
                 padding: 10px;
                 border-radius: 10px;
-                margin-left: 10px;
+                margin-right: 10px;
                 box-shadow: $box-shadow-button;
                 background-color: $button-action;
                 color: $button-action-inner;

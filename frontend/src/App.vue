@@ -14,11 +14,18 @@ export default {
 
 @import "./sass/global.scss";
 
+:root{
+  @media screen and (max-width: $step-0) {
+    font-size: 14px;
+  } 
+  
+}
+
 body{
   background-color: $color-secondary;
   font-family: $font-family;
-  font-size: (16px);
   color: $color-primary;
+  
 }
 
 *{
@@ -29,7 +36,7 @@ body{
   border: 0;
   line-height: 1;
   box-sizing: border-box;
-  font-size: (16px);
+  font-size: rem(16px);
   font-family: $font-family;
 }
 

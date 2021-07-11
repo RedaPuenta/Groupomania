@@ -126,9 +126,9 @@ export default {
         //! On récupère la liste d'avatar et les informations de l'utilisateur
         this.$axios.get(`/asset/avatar`)
         .then((response) => {
-            console.log(response)
-            this.list_avatar = response.data
 
+            this.list_avatar = response.data
+            
             const userId = localStorage.getItem("userId")
 
             this.$axios.get(`user/info/${userId}`)

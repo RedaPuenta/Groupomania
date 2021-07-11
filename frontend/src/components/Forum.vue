@@ -318,33 +318,39 @@ export default {
             }
 
         },
-        //! Fonction qui permet de faire apparaître les boutons de suppression de post
-        buildButtonDeletePost: function(){
+        //! Fonction qui permet de faire apparaître les boutons de suppression de post (ADMIN ALL ACCESS)
+        buildButtonDeletePost: function(privilege){
             
-            let button = document.getElementsByName("deletePost")
+            if(privilege !== 2){
+
+                let button = document.getElementsByName("deletePost")
             
-            for (let i = 0; i < button.length; i++) {
-                
-                if(parseInt(button[i].dataset.mypost) == 0){
-                    button[i].style.display = "none"
+                for (let i = 0; i < button.length; i++) {
+                    
+                    if(parseInt(button[i].dataset.mypost) == 0){
+                        button[i].style.display = "none"
+                    }
+                    
                 }
-                
             }
 
         },
-        //! Fonction qui permet de faire apparaître les boutons de suppression de commentaire
-        buildButtonDeleteComments: function(){
+        //! Fonction qui permet de faire apparaître les boutons de suppression de commentaire (ADMIN ALL ACCESS)
+        buildButtonDeleteComments: function(privilege){
             
-            let comments = document.getElementsByName("comments")
-            
-            for (let i = 0; i < comments.length; i++) {
+            if(privilege !== 2){
+
+                let comments = document.getElementsByName("comments")
                 
-                if(parseInt(comments[i].dataset.mycomments) == 0){
+                for (let i = 0; i < comments.length; i++) {
+                    
+                    if(parseInt(comments[i].dataset.mycomments) == 0){
 
-                    comments[i].removeChild(comments[i].children[1])
+                        comments[i].removeChild(comments[i].children[1])
 
+                    }
+                    
                 }
-                
             }
 
         },
@@ -416,23 +422,27 @@ export default {
             
             this.$axios.post(adresse, body)
             .then((response) => {
-
-                this.data = response.data
+                this.data = response.data.posts
+                return response.data.privilege
             })
-            .then(() => {
+            .then((privilege) => {
                 this.buildClass()
+                return privilege
             })
-            .then(() => {
+            .then((privilege) => {
                 this.buildMyLike()
+                return privilege
             })
-            .then(() => {
+            .then((privilege) => {
                 this.buildMyComments()
+                return privilege
             })
-            .then(() => {
-                this.buildButtonDeletePost()
+            .then((privilege) => {
+                this.buildButtonDeletePost(privilege)
+                return privilege
             })
-            .then(() => {
-                this.buildButtonDeleteComments()
+            .then((privilege) => {
+                this.buildButtonDeleteComments(privilege)
             })
             .then(() => {
                 this.buildBlockReaction()
@@ -830,6 +840,38 @@ export default {
                         line-height: 20px;
                     }
 
+                }
+
+                &__delete{
+                    height: 20px;
+                    width: 20px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    background-color: $button-action;
+                    margin: 0 5px;
+                    color: $button-action-inner;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: $box-shadow-button;
+
+                    &__self{
+                        width: 100%;
+                        height: 100%;
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        bottom: 0;
+                        left: 0;
+                    }
+
+                    &__icon{
+                        color: red;
+                        height: 11px;
+                        width: 11px;
+                    }
                 }
             }
 

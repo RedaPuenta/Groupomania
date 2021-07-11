@@ -327,35 +327,40 @@ export default {
             }
 
         },
-        //! Fonction qui permet de faire apparaître les boutons de suppression de post
-        buildButtonDeletePost: function(){
-            
-            let button = document.getElementsByName("deletePost")
-            
-            for (let i = 0; i < button.length; i++) {
-                
-                if(parseInt(button[i].dataset.mypost) == 0){
-                    button[i].style.display = "none"
-                }
-                
-            }
+        //! Fonction qui permet de faire apparaître les boutons de suppression de post (ADMIN ALL ACCESS)
+        buildButtonDeletePost: function(privilege){
 
+            if(privilege !== 2){
+
+                let button = document.getElementsByName("deletePost")
+
+                for (let i = 0; i < button.length; i++) {
+                
+                    if(parseInt(button[i].dataset.mypost) == 0){
+                        button[i].style.display = "none"
+                    }
+                    
+                }
+            }
+            
         },
-        //! Fonction qui permet de faire apparaître les boutons de suppression de commentaire
-        buildButtonDeleteComments: function(){
+        //! Fonction qui permet de faire apparaître les boutons de suppression de commentaire (ADMIN ALL ACCESS)
+        buildButtonDeleteComments: function(privilege){
             
-            let comments = document.getElementsByName("comments")
-            
-            for (let i = 0; i < comments.length; i++) {
+            if(privilege !== 2){
+
+                let comments = document.getElementsByName("comments")
                 
-                if(parseInt(comments[i].dataset.mycomments) == 0){
+                for (let i = 0; i < comments.length; i++) {
+                    
+                    if(parseInt(comments[i].dataset.mycomments) == 0){
 
-                    comments[i].removeChild(comments[i].children[1])
+                        comments[i].removeChild(comments[i].children[1])
 
+                    }
+                    
                 }
-                
             }
-
         },
         //! Fonction qui permet de choisir les balises de fichiers <img> ou <vidéo> grâce aux keys "media" de la réponse API
         buildBlockMedia: function(){
@@ -456,23 +461,27 @@ export default {
             
             this.$axios.post(adresse, body)
             .then((response) => {
-
-                this.data = response.data
+                this.data = response.data.posts
+                return response.data.privilege
             })
-            .then(() => {
+            .then((privilege) => {
                 this.buildClass()
+                return privilege
             })
-            .then(() => {
+            .then((privilege) => {
                 this.buildMyLike()
+                return privilege
             })
-            .then(() => {
+            .then((privilege) => {
                 this.buildMyComments()
+                return privilege
             })
-            .then(() => {
-                this.buildButtonDeletePost()
+            .then((privilege) => {
+                this.buildButtonDeletePost(privilege)
+                return privilege
             })
-            .then(() => {
-                this.buildButtonDeleteComments()
+            .then((privilege) => {
+                this.buildButtonDeleteComments(privilege)
             })
             .then(() => {
                 this.buildBlockMedia()

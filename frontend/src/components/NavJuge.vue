@@ -7,8 +7,8 @@
                 <!--- Button Desktop --->
                 <span name="choice" data-id="1" @click.self="choice" class="choice__text no_active">Le fil d'actualité</span>
                 <!--- Button Mobile --->
-                <span name="choice" class="choice__icon no_active">
-                    <div data-id="1" @click.self="choice" class="choice__icon__self" data-self="true"></div>
+                <span name="choice-mobile" class="choice__icon no_active">
+                    <div data-id="1" @click.self="choiceMobile" class="choice__icon__self" data-self="true"></div>
                     <i class="fas fa-newspaper fa-lg"></i>
                 </span>  
             </li>
@@ -20,8 +20,8 @@
                 <!--- Button Desktop --->
                 <span name="choice" data-id="2" @click.self="choice" class="choice__text no_active">Mes publications</span> 
                 <!--- Button Mobile --->
-                <span name="choice" class="choice__icon no_active">
-                    <div data-id="2" @click.self="choice" class="choice__icon__self" data-self="true"></div>
+                <span name="choice-mobile" class="choice__icon no_active">
+                    <div data-id="2" @click.self="choiceMobile" class="choice__icon__self" data-self="true"></div>
                     <i class="fas fa-home fa-lg"></i>
                 </span> 
             </li>
@@ -33,8 +33,8 @@
                 <!--- Button Desktop --->
                 <span name="choice" data-id="3" @click.self="choice" class="choice__text no_active">Mes préférés</span>
                 <!--- Button Mobile --->
-                <span name="choice" class="choice__icon no_active">
-                    <div data-id="3" @click.self="choice" class="choice__icon__self" data-self="true"></div>
+                <span name="choice-mobile" class="choice__icon no_active">
+                    <div data-id="3" @click.self="choiceMobile" class="choice__icon__self" data-self="true"></div>
                     <i class="fas fa-crown fa-lg"></i>
                 </span> 
             </li>
@@ -55,7 +55,7 @@ export default {
     },
 
     methods: {
-        //! Fonction qui met à jour la préférence de l'utilisateur et le bouton focus (Fil d'actualité, Mes Publications, Mes préférées)
+        //! Fonction qui met à jour la préférence de l'utilisateur et le bouton focus (Fil d'actualité, Mes Publications, Mes préférées) [Desktop]
         choice: function(event){
 
             this.$emit('navChoice', {choice: parseInt(event.target.dataset.id)})
@@ -68,24 +68,51 @@ export default {
             }
             
             if(event.target.dataset.self){
-                event.target.parentElement.classList.remove("no_active")
-                event.target.parentElement.classList.add("active")
+                event.target.classList.remove("no_active")
+                event.target.classList.add("active")
             }  else{
                 event.target.classList.remove("no_active")
                 event.target.classList.add("active")
             }
             
 
-        }
+        },
+        //! Fonction qui met à jour la préférence de l'utilisateur et le bouton focus (Fil d'actualité, Mes Publications, Mes préférées) [Mobile]
+        choiceMobile: function(event){
+
+            this.$emit('navChoice', {choice: parseInt(event.target.dataset.id)})
+
+            let choice = document.getElementsByName("choice-mobile")
+
+            for (let i = 0; i < choice.length; i++) {
+                choice[i].classList.remove("active")
+                choice[i].classList.add("no_active")
+            }
+            
+            if(event.target.dataset.self){
+                event.target.parentElement.classList.remove("no_active")
+                event.target.parentElement.classList.add("active")
+            }  else{
+                event.target.parentElement.classList.remove("no_active")
+                event.target.parentElement.classList.add("active")
+            }
+            
+
+        },
     },
 
     //! Une fois que la pge est monté ...
     mounted: function(){
         
-        //! On met à jour le bouton focus
+        //! On met à jour le bouton focus [Desktop]
         let choice = document.getElementsByName("choice")
         choice[this.preference - 1].classList.remove("no_active")
         choice[this.preference - 1].classList.add("active")
+
+        //! On met à jour le bouton focus [Mobile]
+        let choice_mobile = document.getElementsByName("choice-mobile")
+        choice_mobile[this.preference - 1].classList.remove("no_active")
+        choice_mobile[this.preference - 1].classList.add("active")
     
     }
 }

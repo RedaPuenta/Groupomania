@@ -51,7 +51,7 @@ exports.friends = (req, res, next)  => {
         ) AS req1
         LEFT JOIN forum
         ON forum.userId = req1.userId
-        WHERE req1.userId != ?
+        WHERE req1.userId != ? AND req1.privilege != 2
         GROUP BY req1.userId`, 
         [userId],
         function(error, results, fields){

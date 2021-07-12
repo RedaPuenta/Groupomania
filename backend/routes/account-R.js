@@ -1,5 +1,6 @@
 const express = require("express")
 const router = express.Router()
+const rateLimit = require("express-rate-limit")
 
 //! Controlleur qui contient toutes les fonctions finales pour la route
 const userController = require("../controllers/account-C")
@@ -13,11 +14,13 @@ const nameVerif = require("../middlewares/nameVerif")
 const emailUseLogin = require("../middlewares/emailUseLogin")
 //! Middleware qui permet de savoir un email est déjà utilisé lors de l'inscription
 const emailUseSignUp = require("../middlewares/emailUseSignUp")
+//! Middleware qui limite les requêtes pour un temps donnée
+const limiterForLogin = rateLimit({windowMs: 15 * 60 * 1000, max: 5, message: {message: "Vous avez effectué trop de tentative, vous pourrez réessayer dans 15 min"}})
 
 //! Routes qui permet de créer un compte (ALL)
 router.post("/signup", nameVerif, emailUseSignUp, emailValid, passwordValid, userController.signup)
 //! Routes qui permet de se connecter (ALL)
-router.post("/login", emailUseLogin, userController.login)
+router.post("/login", limiterForLogin, emailUseLogin, userController.login)
 //! Routes qui permet de bloquer l'accès au site sans connexion préalable (USER)
 router.get("/:id", userController.access)
 

@@ -1,0 +1,1 @@
+Le 12/6/2021 à 2:39:34:518 [::1] [POST] http://localhost:3000/api/multimedia/post [400-Bad Request] [{"file":"","legend":"<<<","userId":"ff51bd00-de57-11eb-99bb-a102cf452cef"}]

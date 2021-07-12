@@ -3,6 +3,7 @@ const express = require("express")
 const app = express()
 const path = require("path")
 const helmet = require("helmet")
+const logger = require("./monitoring/config/logger")
 const accountRoutes = require("./routes/account-R")
 const multimediaRoutes = require("./routes/multimedia-R")
 const agoraRoutes = require("./routes/agora-R")
@@ -25,6 +26,9 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({extended: true}))
 //! Ici, on "parse" automatiquement le corps des requêtes pour les formats "application/json"
 app.use(express.json())
+
+//! On utilise le logger qui capture et écrit les logs pour chaque requêtes
+app.use(logger)
 
 //! Ici, on contruit les chemins de l'application Express avec les routes associées
 app.use('/media', express.static(path.join(__dirname, 'media')))

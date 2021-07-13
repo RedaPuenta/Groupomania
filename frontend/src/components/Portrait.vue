@@ -104,15 +104,16 @@ export default {
         //! Fonction qui permet de changer l'adresse des requêtes (selon la view --> props FOCUS)
         adresseAPI: function(){
 
-            const userId = localStorage.getItem("userId")
+            const userIdLocal = localStorage.getItem("userId")
+            const userIdUrl = this.$route.params.id
 
             if(this.mode == 'Friends'){
 
-                return `user/friends/${userId}`
+                return `user/friends/${userIdLocal}`
 
             } else if (this.mode == 'Profil') {
 
-                return `user/profil/${userId}`
+                return `user/profil/${userIdUrl}`
 
             }
         },
@@ -316,13 +317,15 @@ export default {
                                 bottom: 0;
                                 right: 0;
                                 left: 0;
+                                overflow: hidden;
+                                word-break: break-all;
                                 margin: 0 auto;
                                 width: 98%;
                                 height: 90px;
                                 position: absolute;
                                 background-color: rgb(255, 255, 255);
                                 border-radius: 0 0 10px 10px;
-                                padding: 15px 0 0 0;
+                                padding: 15px 8px 0 8px;
                                 transform: translateY(-100px);
                                 z-index: 1;
                                 transition: transform 0.8s ease-in-out;

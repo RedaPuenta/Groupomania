@@ -1,33 +1,54 @@
 const db = require("../mysql/connectDB")
 const fs = require("fs")
 
-//! Fonction qui permet de récupérer toutes les informations relatives à la page "info" (ALL)
+//! Fonction qui permet de récupérer toutes les informations relatives à la page "info" (USER + ADMIN)
 exports.info = (req, res, next) => {
     
     //* On récupère le "userId" de l'utilisateur qui demande des informations
-    const userId = req.params.userId
+    const userId = req.params.userIdVerif
 
-    //* On récupère dans la base de donnée des informations sur l'utilisateur
-    //* nom, prénom, bio, avatar
+    //* On cherche dans la base donnée le privilège de cette utilisateur
     db.query(`
-        SELECT firstName, lastName, bio, avatar FROM user
+        SELECT privilege FROM user
         WHERE userId = ?`,
         [userId],
-        function(error, results, fields) {
+        function(error, results, fields){
 
             //: Gestion des erreurs
-            if(error == null) {
+            if(error == null){
 
-                //* Et on envoie une réponse de succès
+                //* On stock le privilège de l'utilidateur
+                const privilege = results[0].privilege
+
+                //* On récupère dans la base de donnée des informations sur l'utilisateur
                 //* nom, prénom, bio, avatar
-                res.status(200).json(results)
+                db.query(`
+                SELECT firstName, lastName, bio, avatar, userId FROM user
+                WHERE userId = ?`,
+                [userId],
+                function(error, results, fields) {
+
+                    //: Gestion des erreurs
+                    if(error == null) {
+
+                        //* Et on envoie une réponse de succès
+                        //* nom, prénom, bio, avatar, userId, privilege
+                        res.status(200).json({info: results, privilege: privilege})
+
+                    //: Gestion des erreurs
+                    } else {
+
+                        res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
+
+                    }
+                }
+            )
 
             //: Gestion des erreurs
-            } else {
-
+            } else{
                 res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
-
             }
+
         }
     )
 

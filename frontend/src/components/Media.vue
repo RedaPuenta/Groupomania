@@ -110,13 +110,10 @@
                     <i class="fas fa-seedling fa-lg"></i>
                 </button>
             </form>
-
-            <!---- Partie Erreur (Focus) ---->
-            <div v-if="focus == true" class="media__error">
-                <!--- Composant Error (pour les erreurs) --->
-                <Error/>
-            </div>  
-
+            
+            <!--- Composant Error (pour les erreurs) --->
+            <Error v-if="focus == true" class="media__error"></Error>
+            
         </div>
     </div>
 </template>
@@ -577,7 +574,7 @@ export default {
     .media_big{
         margin: 40px;
         width: 70%;
-        padding: 0 10px;
+        padding: 0 10px 10px 10px;
         @media screen and (max-width: $step-1) {
             width: 100%;
             margin: 40px 30px 60px 30px;
@@ -807,7 +804,11 @@ export default {
             background-color: $color-third;
             box-shadow: $box-shadow-inner;
             padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             text-align: center;
+            flex: 2;
 
             &__text{
                 font-size: rem(12px);

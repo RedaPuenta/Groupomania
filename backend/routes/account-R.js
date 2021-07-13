@@ -15,7 +15,7 @@ const emailUseLogin = require("../middlewares/emailUseLogin")
 //! Middleware qui permet de savoir un email est déjà utilisé lors de l'inscription
 const emailUseSignUp = require("../middlewares/emailUseSignUp")
 //! Middleware qui limite les requêtes pour un temps donnée
-const limiterForLogin = rateLimit({windowMs: 15 * 60 * 1000, max: 5, message: {message: "Vous avez effectué trop de tentative, vous pourrez réessayer dans 15 min"}})
+const limiterForLogin = rateLimit({windowMs: 15 * 60 * 1000, max: 30, message: {message: "Vous avez effectué trop de tentative, vous pourrez réessayer dans 15 min"}})
 
 //! Routes qui permet de créer un compte (ALL)
 router.post("/signup", nameVerif, emailUseSignUp, emailValid, passwordValid, userController.signup)

@@ -104,12 +104,9 @@
                 </button>
             </form>
 
-            <!---- Partie Erreur (Focus) ---->
-            <div v-if="focus == true" class="media__error">
-                <!--- Composant Error (pour les erreurs) --->
-                <Error/>
-            </div>  
-
+            <!--- Composant Error (pour les erreurs) --->
+            <Error v-if="focus == true" class="media__error"></Error>
+             
         </div>
     </div>
 </template>
@@ -534,7 +531,7 @@ export default {
     .media_big{
         margin: 40px;
         width: 70%;
-        padding: 0 10px;
+        padding: 0 10px 10px 10px;
         @media screen and (max-width: $step-1) {
             width: 100%;
             margin: 40px 30px 60px 30px;
@@ -618,11 +615,13 @@ export default {
 
         &__question{
             width: 100%;
-            height: 100px;
-            padding: 10px 50px;
+            padding: 40px 50px;
             display: flex;
             justify-content: center;
             align-items: center;
+            @media screen and (max-width: $step-1) {
+                padding: 20px;
+            }
 
             span{
                 line-height: 1.2;

@@ -12,6 +12,10 @@ module.exports = (req, res, next) => {
         
         res.status(400).json({message: "Certains caractères contenu dans votre titre ne sont pas acceptables"})
     
+    } else if (field.length > 100){
+
+        res.status(400).json({message: "Votre titre est trop long (max 100 caractères)"})
+
     } else {
 
         next()

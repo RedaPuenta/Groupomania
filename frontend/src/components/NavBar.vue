@@ -56,14 +56,14 @@
 
             <!--- Bouton "Supprimer mon compte" (Account) [Desktop] --->
             <div @click="deleteUser" class="navbar__profil" v-if="mode == 'account' && us == true">
-                <span class="navbar__profil__text">Supprimer mon compte</span>
+                <span class="navbar__profil__text">{{text_delete}}</span>
                 <i class="navbar__profil__icon fas fa-trash fa-lg"></i>
             </div>
 
             <!--- Bouton "Modifier mes informations" (Account) [Desktop] --->
             <div class="navbar__profil" v-if="mode == 'account' && us == true">
-                <router-link :to="{name: 'Info'}">
-                    <span class="navbar__profil__text">Modifier mes informations</span>
+                <router-link :to="{name: 'Info', params: {id: userId}}">
+                    <span class="navbar__profil__text">{{text_update}}</span>
                     <i class="navbar__profil__icon fas fa-user-edit fa-lg"></i>
                 </router-link>
             </div>
@@ -109,14 +109,14 @@
             
             <!--- Bouton "Supprimer mon compte" --->
             <div @click="deleteUser" class="profil__item" v-if="mode == 'account' && us == true">
-                <span class="profil__item__text">Supprimer mon compte</span>
+                <span class="profil__item__text">{{text_delete}}</span>
                 <i class="profil__item__icon fas fa-trash fa-lg"></i>
             </div>
 
             <!--- Bouton "Modifier mes informations" --->
             <div class="profil__item" v-if="mode == 'account' && us == true">
-                <router-link :to="{name: 'Info'}">
-                    <span class="profil__item__text">Modifier mes informations</span>
+                <router-link :to="{name: 'Info', params: {id: userId}}">
+                    <span class="profil__item__text">{{text_update}}</span>
                     <i class="profil__item__icon fas fa-user-edit fa-lg"></i>
                 </router-link>
             </div>
@@ -143,10 +143,15 @@ export default {
             userId: "",
             //! Variable qui permet d'afficher les boutons de gestion de compte si la page profil appartient à l'utilisateur
             us: false,
+            //! Ensemble de variables qui contiennent les textes des boutons de gestion de compte
+            text_delete: "",
+            text_update: "",
             //! Variable qui connaît l'état du bouton "Mon compte" (Accueil)
             toggle: false,
             //! Variable qui connaît l'état du bouton "Menu tiroir" (Accueil)
-            toggle_mobile: false
+            toggle_mobile: false,
+            //! Variable qui contient le privilège de l'utilisateur (1 par défaut)
+            privilege: 1
         }
     },
 
@@ -167,10 +172,13 @@ export default {
             let mobile_active = document.getElementsByName("mobile-active")
             
             if(this.toggle_mobile == false){
+
                 this.toggle_mobile = true
                 mobile_desactive[0].style.display = "none"
                 mobile_active[0].style.display = "block"
+
             } else if(this.toggle_mobile == true){
+
                 this.toggle_mobile = false
                 mobile_desactive[0].style.display = "block"
                 mobile_active[0].style.display = "none"
@@ -185,13 +193,20 @@ export default {
         //! Fonction qui permet de supprimer un utilisateur
         deleteUser: function(){
 
-            const userId = localStorage.getItem('userId')
+            const userId = this.$route.params.id
 
             this.$axios.delete(`/user/${userId}`)
             .then(() => {
 
-                localStorage.clear()
-                this.$router.push({name: 'Connexion'})
+                if(this.privilege == 1 || this.$route.params.id == localStorage.getItem("userId")){
+
+                    localStorage.clear()
+                    this.$router.push({name: 'Connexion'})
+
+                } else{
+
+                    this.$router.push({name: 'Friends'})
+                }
 
             })
             .catch((error) => {
@@ -205,18 +220,35 @@ export default {
     beforeMount: function(){
 
         const userId = localStorage.getItem("userId")
-        this.userId = userId
-
-        //! On détermine si la page "Profil" sur laquelle l'utilisateur se trouve lui appartient
-        if(userId == this.$route.params.id){
-            this.us = true
-        }
-
+        
         //! On récupère les informations de l'utilisateur inscrit dans la barre de navigation
         this.$axios.get(`user/info/${userId}`)
         .then((response) => {
-            this.avatar = response.data[0].avatar
-            this.firstName = response.data[0].firstName
+            this.avatar = response.data.info[0].avatar
+            this.firstName = response.data.info[0].firstName
+            this.privilege = response.data.privilege
+        })
+        .then(() => {
+            if(this.mode == 'accueil'){
+                this.userId = localStorage.getItem("userId")
+            } else if(this.mode == 'account'){
+                this.userId = this.$route.params.id
+            }
+        })
+        .then(() => {
+            //* On détermine si la page "Profil" sur laquelle l'utilisateur se trouve lui appartient
+            if(userId == this.$route.params.id || this.privilege > 1){
+                this.us = true
+            }
+
+            if(this.privilege > 1 && this.$route.params.id !== localStorage.getItem("userId").toString()){
+                this.text_delete = "Supprimer son compte"
+                this.text_update = "Modifier ses informations"
+            } else {
+                this.text_delete = "Supprimer mon compte"
+                this.text_update = "Modifier mes informations"
+            }
+            
         })
         .catch((error) => {
             console.log(error)

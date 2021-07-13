@@ -33,7 +33,15 @@
             </div>
 
             <!---- Champ Biographie ---->
-            <textarea class="neo-inverse" rows="4" placeholder="Biographie" v-model="bio"></textarea>
+            <div class="info__details__bio">
+                <textarea name="textArea" class="neo-inverse" @input="maxLengthBio" maxlength="150" rows="4" placeholder="Biographie" v-model="bio"></textarea>
+                <div class="info__details__bio__counter">
+                    <span name="textAreaLength">0</span>
+                    <span>/150</span>
+                    <i class="info__details__bio__counter__icon fas fa-text-width fa-sm" ></i>
+                </div>
+            </div>
+            
 
             <!---- Bouton de soumission ---->
             <button @click="updateInfo">{{buttonText}}</button>
@@ -76,6 +84,11 @@ export default {
     },  
 
     methods: {
+        //! Fonction qui permet de compter et d'indiquer en temps réel le nombre de caractères de la bio
+        maxLengthBio: function(event){
+            
+            event.target.parentElement.children[1].children[0].textContent = event.target.value.length
+        },
         //! Fonction qui pré-affiche l'avatar choisie par l'utilisateur
         getAvatar: function(event){
             this.avatar = event.target.dataset.avatar
@@ -87,7 +100,7 @@ export default {
             const bio = this.bio
             const firstName = this.firstName
             const lastName = this.lastName
-            const userId = localStorage.getItem("userId")
+            const userId = this.$route.params.id
 
             this.$axios.put(`/user/${userId}`, {avatar: avatar, bio: bio, firstName: firstName, lastName: lastName})
             .then(() => {
@@ -118,7 +131,7 @@ export default {
     },
 
     //! Une fois que la page est monté ...
-    mounted: function(){
+    beforeMount: function(){
 
         //! On exécute la fonction Neo
         this.$store.dispatch('neo')
@@ -129,19 +142,26 @@ export default {
 
             this.list_avatar = response.data
             
-            const userId = localStorage.getItem("userId")
+            const userId = this.$route.params.id
 
             this.$axios.get(`user/info/${userId}`)
             .then((response) => {
                 
-                this.firstName = response.data[0].firstName
-                this.lastName = response.data[0].lastName
-                this.bio = response.data[0].bio
-                this.avatar = response.data[0].avatar
+                this.firstName = response.data.info[0].firstName
+                this.lastName = response.data.info[0].lastName
+                this.bio = response.data.info[0].bio
+                this.avatar = response.data.info[0].avatar
 
             })  
-            .catch((error) => {
-                console.log(error)
+            .then(() => {
+                let textArea = document.getElementsByName("textArea")
+                let textAreaLength = document.getElementsByName("textAreaLength")
+
+                textAreaLength[0].textContent = textArea[0].value.length
+                
+            })
+            .catch(() => {
+                this.$router.push({name: "Multimedia"})
             })
 
         })
@@ -324,6 +344,39 @@ export default {
 
             }
 
+            &__bio{
+                width: 100%;
+                height: 100%;
+                margin: 20px 0;
+                position: relative;
+
+                span{
+                    font-weight: bold;
+                }
+
+                &__counter{
+                    position: absolute;
+                    top: -20px;
+                    right: 5px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    &__icon{
+                        margin-left: 5px;
+                    }
+                }
+
+                textarea{
+                    text-align: center;
+                    width: 100%;
+                    border-radius: 10px;
+                    padding: 15px 5px;
+                    resize: none;
+                    background-color: $color-secondary;
+                }
+            }
+
             button{
                 border-radius: 30px;
                 color: $button-action-inner;
@@ -351,25 +404,15 @@ export default {
         
     }
 
-    input, textarea{
+    input{
         margin: 20px 0;
         text-align: center;
         width: 100%;
-    }
-
-    input{
         border-radius: 30px;
         height: 50px;
         @media screen and (max-width: $step-2){
             height: 45px;
         }
-    }
-
-    textarea{
-        border-radius: 10px;
-        padding: 15px 5px;
-        resize: none;
-        background-color: $color-secondary;
     }
 
     ::-webkit-scrollbar{

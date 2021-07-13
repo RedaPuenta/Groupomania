@@ -30,20 +30,23 @@
                 </div>
                 
                 <!--- Champ "Ecrire une légende" (Multimédia) --->
-                <textarea v-if="multimedia == true" v-model="legend" class="media__post__write__publication" name="legend" rows="3" placeholder="Ecrivez votre légende ..."></textarea>
+                <textarea maxlength="100" @input="maxLength" v-if="multimedia == true" v-model="legend" class="media__post__write__publication" name="legend" rows="3" placeholder="Ecrivez votre légende ..."></textarea>
                 
                 <!--- Champ "Ecrire un titre" (Agora) --->
-                <textarea v-if="agora == true" v-model="titre" class="media__post__write__publication publication-agora" name="titre" rows="5" placeholder="Ecrivez votre sujet ..."></textarea>
-                
+                <textarea maxlength="100" @input="maxLength" v-if="agora == true" v-model="titre" class="media__post__write__publication publication-agora" name="titre" rows="5" placeholder="Ecrivez votre sujet ..."></textarea>
+
+                <div class="max-length">
+                    <span name="countText">0</span>
+                    <span>/100</span>
+                </div>
+    
                 <!--- Bouton de soumission (Multimédia/Agora) --->
                 <button @click="newPost" v-if="stopSend == false" class="media__post__write__submit" type="button">{{textButton}}</button>
                 <button v-if="stopSend == true" class="media__post__write__submit" type="button">{{textButton}}</button>
                 
-                <!--- Partie Erreur (Multimédia/Agora) --->
-                <div class="media__post__write__error">
-                    <!--- Composant Error (pour les erreurs) --->
-                    <Error/>
-                </div>
+                <!--- Composant Error (pour les erreurs) --->
+                <Error class="media__post__write__error"></Error>
+                
             </form>
         </div>
     </div>
@@ -87,6 +90,10 @@ export default {
     },
 
     methods: {
+        //! Fonction qui permet de compter et d'indiquer en temps réel le nombre de caractères du champ (légende/titre)
+        maxLength: function(event){
+            document.getElementsByName("countText")[0].textContent = event.target.value.length
+        },
         //! Fonction qui réinitialise toutes les variables
         dataReset: function(){
             this.$store.commit("DESACTIVE_ERROR")
@@ -442,6 +449,23 @@ export default {
 
                 }
 
+                .max-length{
+                    margin-top: 5px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    span{
+                        font-weight: bold;
+                        font-size: rem(14px);
+                    }
+
+                    &__info{
+                        margin-left: 5px;
+                    }
+                    
+                }
+
                 .publication-agora{
                     border-radius: 30px 30px 0 0;
                 }
@@ -471,6 +495,15 @@ export default {
                 }
             }
         }
+    }
+
+    ::-webkit-scrollbar{
+        width: 5px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb{
+        background-color: rgb(0, 0, 0);
     }
 
 

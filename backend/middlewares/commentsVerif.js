@@ -2,7 +2,7 @@
 module.exports = (req, res, next) => {
 
     const reaction = req.body.reaction
-    const regexAntiInjection = /[<>}{;_|^*~$]/
+    const regexAntiInjection = /[<>}{_|^*~$]/
     
     if(reaction == "" || !/[a-z]/.test(reaction)){
         

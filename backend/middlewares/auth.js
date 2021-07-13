@@ -35,7 +35,7 @@ module.exports = (req, res, next) => {
                     if(error == null){
 
                         //* Si l'utilisateur est ADMIN ...
-                        if(results[0].privilege == 2) {
+                        if(results[0].privilege > 1) {
 
                             //* On pourra modifier ou supprimer un utilisateur
                             next()
@@ -75,7 +75,7 @@ module.exports = (req, res, next) => {
                     if(error == null) {
 
                         //* Si l'émetteur de la requête est ADMIN ...
-                        if(results[0].privilege == 2) {
+                        if(results[0].privilege > 1) {
 
                             //* On supprime le commentaire
                             next()
@@ -143,7 +143,7 @@ module.exports = (req, res, next) => {
                     if(error == null) {
 
                         //* Si l'émetteur de la requête est ADMIN ...
-                        if(results[0].privilege == 2) {
+                        if(results[0].privilege > 1) {
 
                             //* On supprime le post
                             next()

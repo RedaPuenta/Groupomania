@@ -154,7 +154,7 @@ export default {
 
                     if(firstConnection == 0) {
 
-                        this.$router.push({name: 'Info'})
+                        this.$router.push({name: 'Info', params: {id: userId}})
 
                     } else {
 

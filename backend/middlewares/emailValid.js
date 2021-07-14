@@ -1,16 +1,22 @@
 //! Middleware qui permet de vérifier si un email est valide
 module.exports = (req, res, next) => {
 
+    //* On récupère l'email de l'utilisateur dans  le corps de la requête
     const emailReq = req.body.email
+    //* On déclare notre Regex qui vérifié si un email est valide
     const regexEmail = new RegExp('^[a-zA-Z0-9._%+-]{2,}[@]{1}[a-zA-Z0-9.-]{2,}[.]{1}[a-zA-Z]{2,3}$', 'g')
 
+    //* Si l'email de l'utilisateur est en concordance avec le regex ...
     if(emailReq.match(regexEmail)) {
 
+        //* On passe à la suite
         next()
-
+    
+    //* Sinon, si l'email de l'utilisateur n'est pas en concordance avec le regex ...
     } else {
 
-        res.status(400).json({message : "L'email ne semble pas valide"})
+        //* On envoie réponse d'échec
+        res.status(400).json({message: "L'email ne semble pas valide"})
         
     }
 

@@ -58,6 +58,8 @@
 
             </div>
 
+            <span>{{item.datePost}}</span>
+
             <!---- Partie Légende (Scroll/Focus) ---->
             <div class="media__legend">
                 <span class="media__author__text">{{item.legend}}</span>
@@ -98,7 +100,7 @@
                         <i class="fas fa-caret-down"></i>
                     </button>
                 </router-link>
-                
+
             </div>
             
             <div v-if="focus == true" class="media__titre">Mon commentaire</div>
@@ -458,6 +460,7 @@ export default {
             
             this.$axios.post(adresse, body)
             .then((response) => {
+                console.log(response)
                 this.data = response.data.posts
                 return response.data.privilege
             })

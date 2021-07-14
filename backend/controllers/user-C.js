@@ -1,167 +1,121 @@
 const db = require("../mysql/connectDB")
+const dbRequest = require("../mysql/dbRequest")
 const fs = require("fs")
 
 //! Fonction qui permet de récupérer toutes les informations relatives à la page "info" (USER + ADMIN)
-exports.info = (req, res, next) => {
+exports.info = (req, res) => {
     
     //* On récupère le "userId" de l'utilisateur qui demande des informations
     const userId = req.params.userIdVerif
 
     //* On cherche dans la base donnée le privilège de cette utilisateur
-    db.query(`
-        SELECT privilege FROM user
-        WHERE userId = ?`,
-        [userId],
-        function(error, results, fields){
+    db.query(dbRequest.privilegeUser(userId), function(error, results){
 
-            //: Gestion des erreurs
-            if(error == null){
+        //: Gestion des erreurs
+        if(error == null){
 
-                //* On stock le privilège de l'utilidateur
-                const privilege = results[0].privilege
+            //* On stock le privilège de l'utilidateur
+            const privilege = results[0].privilege
 
-                //* On récupère dans la base de donnée des informations sur l'utilisateur
-                //* nom, prénom, bio, avatar
-                db.query(`
-                SELECT firstName, lastName, bio, avatar, userId FROM user
-                WHERE userId = ?`,
-                [userId],
-                function(error, results, fields) {
+            //* On récupère dans la base de donnée des informations sur l'utilisateur
+            //-SELECT --> firstName, lastName, bio, avatar, userId
+            db.query(dbRequest.recoverForInfo(userId), function(error, results) {
 
-                    //: Gestion des erreurs
-                    if(error == null) {
+                //: Gestion des erreurs
+                if(error == null) {
 
-                        //* Et on envoie une réponse de succès
-                        //* nom, prénom, bio, avatar, userId, privilege
-                        res.status(200).json({info: results, privilege: privilege})
+                    //* Et on envoie une réponse de succès
+                    res.status(200).json({info: results, privilege: privilege})
 
-                    //: Gestion des erreurs
-                    } else {
+                //: Gestion des erreurs
+                } else {
 
-                        res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
+                    res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
 
-                    }
                 }
-            )
+            })
 
-            //: Gestion des erreurs
-            } else{
-                res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
-            }
-
+        //: Gestion des erreurs
+        } else{
+            res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
         }
-    )
+
+    })
 
 }
 
 //! Fonction qui permet de récupérer toutes les informations relatives à la page "friends" (ALL)
-exports.friends = (req, res, next)  => {
+exports.friends = (req, res)  => {
 
     //* On récupère le "userId" de l'utilisateur qui demande les informations
     const userId = req.params.userId
     
     //* On récupère dans la base de données des informations sur tout les autres utilisateurs (sauf celui qui demande)
-    //* Avatar, prénom, nom, bio + nombre de contenu "agora" et "multimedia"
-    db.query(`
-        SELECT req1.*, COUNT(forum.postId) As forum FROM (
-            SELECT user.*, COUNT(multimedia.postId) AS multimedia
-            FROM user
-            LEFT JOIN multimedia
-            ON multimedia.userId = user.userId
-            GROUP BY user.userId
-        ) AS req1
-        LEFT JOIN forum
-        ON forum.userId = req1.userId
-        WHERE req1.userId != ? AND req1.privilege != 2
-        GROUP BY req1.userId`, 
-        [userId],
-        function(error, results, fields){
+    //-SELECT --> firstName, lastName, bio, avatar, userId + nombre de contenu "agora" et "multimedia"
+    db.query(dbRequest.recoverForFriends(userId), function(error, results){
 
-            //: Gestion des erreurs
-            if(error == null) {
+        //: Gestion des erreurs
+        if(error == null) {
 
-                //* Et on envoie une réponse de succès
-                //* Avatar, prénom, nom, bio + nombre de contenu "agora" et "multimedia"
-                res.status(200).json(results)
+            //* Et on envoie une réponse de succès
+            res.status(200).json(results)
 
-            //: Gestion des erreurs
-            } else {
-                res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
-            }
+        //: Gestion des erreurs
+        } else {
+            res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
         }
-    )
+    })
     
 }
 
 //! Fonction qui permet de récupérer toutes les informations relatives à la page "Profil" (ALL)
-exports.profil = (req, res, next)  => {
+exports.profil = (req, res)  => {
     
     //* On récupère le "userId" de l'utilisateur ciblé
     const userId = req.params.userId
     
     //* On récupère dans la base de données des informations sur l'utilisateur ciblées
     //* Avatar, prénom, nom, bio + nombre de contenu "agora" et "multimedia" + nombre de "like" et de "commentaire" 
-    db.query(`
-        SELECT req3.*, COUNT(comments.userId) AS likes FROM (
-            SELECT req2.*, COUNT(likes.userId) AS comments FROM (
-                SELECT req1.*, COUNT(forum.postId) As forum FROM (
-                    SELECT user.*, COUNT(multimedia.postId) AS multimedia
-                    FROM user
-                    LEFT JOIN multimedia
-                    ON multimedia.userId = user.userId
-                    GROUP BY user.userId
-                ) AS req1
-                LEFT JOIN forum
-                ON forum.userId = req1.userId
-                WHERE req1.userId = ?
-            ) AS req2
-            LEFT JOIN likes
-            ON likes.userId = req2.userId
-            ) AS req3
-            LEFT JOIN comments
-            ON comments.userId = req3.userId`, 
-        [userId],
-        function(error, results, fields){
+    db.query(dbRequest.recoverForProfil(userId), function(error, results){
 
-            //: Gestion des erreurs
-            if(error == null) {
+        //: Gestion des erreurs
+        if(error == null) {
 
-                //* On créer le score de "réaction" et de "participation" de l'utilisateur selon un algorithme
-                const pts_likes = 14
-                const pts_comments = 11
-                const pts_multimedia = 17
-                const pts_forum = 21
-                let score_reaction = (parseInt(results[0].likes) * pts_likes) + (parseInt(results[0].comments) * pts_comments)
-                let score_participation = (parseInt(results[0].multimedia) * pts_multimedia) + (parseInt(results[0].forum) * pts_forum)
+            //* On créer le score de "réaction" et de "participation" de l'utilisateur selon un algorithme
+            const pts_likes = 14
+            const pts_comments = 11
+            const pts_multimedia = 17
+            const pts_forum = 21
+            let score_reaction = (parseInt(results[0].likes) * pts_likes) + (parseInt(results[0].comments) * pts_comments)
+            let score_participation = (parseInt(results[0].multimedia) * pts_multimedia) + (parseInt(results[0].forum) * pts_forum)
 
-                //* On envoie une réponse de succès
-                //* avatar, nom, prénom, bio + nombre de contenu "agora" et "multimedia" + score de "réaction" et de "participation"
-                res.status(200).json(
-                    [
-                        {
-                            score_reaction: score_reaction, 
-                            score_participation: score_participation,
-                            avatar: results[0].avatar,
-                            firstName: results[0].firstName,
-                            lastName: results[0].lastName,
-                            multimedia: results[0].multimedia,
-                            forum: results[0].forum,
-                            bio: results[0].bio
-                        }
-                    ]
-                )
-            
-            //: Gestion des erreurs
-            } else {
-                res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
-            }
+            //* On envoie une réponse de succès
+            //* avatar, nom, prénom, bio + nombre de contenu "agora" et "multimedia" + score de "réaction" et de "participation"
+            res.status(200).json(
+                [
+                    {
+                        score_reaction: score_reaction, 
+                        score_participation: score_participation,
+                        avatar: results[0].avatar,
+                        firstName: results[0].firstName,
+                        lastName: results[0].lastName,
+                        multimedia: results[0].multimedia,
+                        forum: results[0].forum,
+                        bio: results[0].bio
+                    }
+                ]
+            )
+        
+        //: Gestion des erreurs
+        } else {
+            res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
         }
-    )
+    })
     
 }
 
 //! Fonction qui permet de modifier les informations d'un utilisateur (USER + ADMIN)
-exports.updateUser = (req, res, next) => {
+exports.updateUser = (req, res) => {
 
     //* On récupère toutes les nouvelles informations
     const avatar = req.body.avatar
@@ -171,85 +125,63 @@ exports.updateUser = (req, res, next) => {
     const userId = req.params.userIdVerif
     
     //* On remplace les anciennes informations par les nouvelles + témoin de première connexion (true)
-    db.query(`
-        UPDATE user SET 
-        avatar = ?,
-        bio = ?,
-        firstName = ?,
-        lastName = ?,
-        firstConnection = "1"
-        WHERE userId = ?
-        `,
-        [avatar, bio, firstName, lastName, userId],
-        function(error, results, fields) {
+    db.query(dbRequest.updateUser(avatar, bio, firstName, lastName, 1, userId), function(error) {
             
-            //: Gestion des erreurs
-            if(error == null) {
-                res.status(201).json({message: "Vos informations on été modifiées"})
-            //: Gestion des erreurs
-            } else {
-                res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
-            }
-
+        //: Gestion des erreurs
+        if(error == null) {
+            res.status(201).json({message: "Vos informations on été modifiées"})
+        //: Gestion des erreurs
+        } else {
+            res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
         }
-    )
+
+    })
 }
 
 //! Fonction qui permet de supprimé un utilisateur (USER + ADMIN)
-exports.deleteUser = (req, res, next) => {
+exports.deleteUser = (req, res) => {
 
     //* On récupère le "userId" de l'utlisateur qui doit être supprimée 
     const userId = req.params.userIdVerif
 
     //* On récupère dans la base de donnée tout les fichiers (url) associés à l'utilisateur
-    db.query(`
-        SELECT media FROM multimedia
-        WHERE userId = ?`, 
-        [userId],
-        function(error, results, fields){
+    db.query(dbRequest.selectCurrentFileUser(userId), function(error, results){
 
-            //: Gestion des erreurs
-            if(error == null){
-                
-                //* On stock les fichiers (url) associés à l'utilisateur
-                const mediaUrl = results
-                
-                //* On supprime l'utilisateur dans la base de donnée
-                db.query(`
-                    DELETE FROM user 
-                    WHERE userId = ?
-                    `,
-                    [userId],
-                    function(error, results, fields) {
-                        
-                        //: Gestion des erreurs
-                        if(error == null) {
-
-                            //* On supprime tout les fichiers associés à l'utilisateurs dans le serveur
-                            for (let i = 0; i < mediaUrl.length; i++) {
-                                
-                                fs.unlink(`media/${mediaUrl[i].media}`, (err) => {
-                                    if (err) throw err
-                                })
-                                
-                            }
-
-                            res.status(200).json({message: "Votre compte à été supprimée"})
-                        
-                        //: Gestion des erreurs
-                        } else {
-                            res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
-                        }
-
-                    }
-                )
+        //: Gestion des erreurs
+        if(error == null){
             
-            //: Gestion des erreurs
-            } else {
-                res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
-            }
+            //* On stock les fichiers (url) associés à l'utilisateur
+            const mediaUrl = results
+            
+            //* On supprime l'utilisateur dans la base de donnée
+            db.query(dbRequest.deleteUser(userId), function(error) {
+                    
+                //: Gestion des erreurs
+                if(error == null) {
 
+                    //* On supprime tout les fichiers associés à l'utilisateurs dans le serveur
+                    for (let i = 0; i < mediaUrl.length; i++) {
+                        
+                        fs.unlink(`media/${mediaUrl[i].media}`, (err) => {
+                            if (err) throw err
+                        })
+                        
+                    }
+
+                    res.status(200).json({message: "Votre compte à été supprimée"})
+                
+                //: Gestion des erreurs
+                } else {
+                    res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
+                }
+
+            })
+        
+        //: Gestion des erreurs
+        } else {
+            res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
         }
-    )
+
+    })
 
 }

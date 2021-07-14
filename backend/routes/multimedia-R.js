@@ -7,7 +7,7 @@ const multimediaController = require("../controllers/multimedia-C")
 const auth = require("../middlewares/auth")
 //! Middleware qui permet de télécharger des fichiers
 const uploadMedia = require("../middlewares/uploadMedia")
-//! Middleware qui permet de vérifier si une légende de post est valide
+//! Middleware qui permet de vérifier si une publication (Multimédia) est valide
 const multimediaVerif = require("../middlewares/multimediaVerif")
 
 //! Routes qui permet de récupérer plusieurs contenus multimédia (USER)

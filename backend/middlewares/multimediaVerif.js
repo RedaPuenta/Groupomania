@@ -1,44 +1,63 @@
 const fs = require("fs")
 
-//! Middleware qui permet de vérifier si une légende de post est valide
+//! Middleware qui permet de vérifier si une publication (Multimédia) est valide
 module.exports = (req, res, next) => {
     
+    //* On récupère la légende contenu dans le corps de la requête
     const field = req.body.legend
-    const regexAntiInjection = /[<>}{;_|^*~$]/
     
+    //* On déclare le regex "ANTI-INJECTION"
+    const regexAntiInjection = /[<>}{_|^*~$]/
+
+    //* On créer une fonction pour supprimer le fichier précédemment télécharger (si il y en a un)
     function deleteImage() {
         if(req.file) {
             fs.unlink(`media/${req.file.filename}`, (err) => {
                 if (err) throw err
             })
-        }  
+        }
     }
-    
-    if(field == ""  || !/[a-z]/.test(field)){
 
-        deleteImage()
+    //* On configure un tableau contenant tout les conditions à vérifier et leur réponse
+    const cas = [
+        {condition: field == "" || !/[a-zA-Z]/.test(field), réponse: `Vous avez oublié de renseigner une légende`, active: true},
+        {condition: regexAntiInjection.test(field), réponse: `Certains caractères contenu dans votre légende ne sont pas acceptables`, active: true},
+        {condition: field.length > 100, réponse: `Votre légende est trop longue (max 100 caractères)`, active: true},
+        {condition: !req.file, réponse: `Votre publication ne contient pas de fichier`, active: false}
+    ]
+
+    //* On configure un système de point
+    const valid = cas.length
+    var points = 0
+
+    //* Pour chaque conditions ...
+    for (let i = 0; i < cas.length; i++) {
         
-        res.status(400).json({message: "Vous avez oublié de renseigner une légende"})
+        //* Si la condition n'est pas respecter ...
+        if(cas[i].condition){
 
-    } else if (regexAntiInjection.test(field)) {
+            //* On supprime le fichier précédemment télécharger quand il le faut (si il y en a un)
+            if(cas[i].active == true){
+                deleteImage()
+            }
+
+            //* On envoie une réponse d'échec personnalisée
+            res.status(400).json({message: cas[i].réponse})
+            break
         
-        deleteImage()
-
-        res.status(400).json({message: "Certains caractères contenu dans votre légende ne sont pas acceptables"})
-    
-    } else if (field.length > 100){
-
-        deleteImage()
-
-        res.status(400).json({message: "Votre légende est trop longue (max 100 caractères)"})
-
-    } else if (!req.file) {
+        //* Si tout est correct, on ajoute 1 point
+        } else {
+            points++
+        }
         
-        res.status(400).json({message: "Votre publication ne contient de pas fichier"})
-        
-    } else {
- 
+    }
+
+    //* Si les points correpondent à la taille du tableau des conditions à vérifier ...
+    if(valid == points) {
+
+        //* On passe à la suite
         next()
+
     }
     
 }

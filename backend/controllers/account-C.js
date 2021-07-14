@@ -1,12 +1,13 @@
 require("dotenv").config()
+const db = require("../mysql/connectDB")
+const dbRequest = require("../mysql/dbRequest")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const cryptojs = require("crypto-js")
 const idGenerator = require ("uuid")
-const db = require("../mysql/connectDB")
 
 //! Fonction qui permet de créer un compte (ALL)
-exports.signup = (req, res, next) => {
+exports.signup = (req, res) => {
 
     //* On récupère le nom, le prénom, le password, l'email (crypte)
     const firstName = req.body.prenom.charAt(0).toUpperCase() + req.body.prenom.slice(1).toLowerCase()
@@ -26,21 +27,16 @@ exports.signup = (req, res, next) => {
     .then((hash) => {   
 
         //* On créer un nouvelle utilisateur dans la base de donnée
-        db.query(`INSERT INTO user (email, password, firstName, lastName, userId, avatar, bio, privilege, dateCreation, firstConnection) 
-            VALUES(?, ?, ?, ?, ?, ?, ?, DEFAULT, NOW(), DEFAULT)`, 
-            [emailUser, hash, firstName, lastName, userId, avatar, bio], 
+        db.query(dbRequest.register(emailUser, hash, firstName, lastName, userId, avatar, bio), function(error){
 
-            function(error, results, fields){
-
-                //: Gestion des erreurs
-                if(error == null){
-                    res.status(201).json({message: "Votre compte à été créé !"})   
-                //: Gestion des erreurs
-                } else {
-                    res.status(500).json({message: "Votre compte n'a pas pu être créé !"})   
-                }
+            //: Gestion des erreurs
+            if(error == null){
+                res.status(201).json({message: "Votre compte à été créé !"})   
+            //: Gestion des erreurs
+            } else {
+                res.status(500).json({message: "Votre compte n'a pas pu être créé !"})   
             }
-        )
+        })
         
     })
 
@@ -50,79 +46,58 @@ exports.signup = (req, res, next) => {
 }
 
 //! Fonction qui permet de se connecter (ALL)
-exports.login = (req, res, next) => {
+exports.login = (req, res) => {
     
     //* On récupère l'email (crypte) et le mot de passe
     const emailUser = cryptojs.HmacMD5(req.body.email.toLowerCase(), process.env.CRYPTOJS_SECRET).toString()
     const passwordUser = req.body.password
 
-    //* On récupère dans la base de donnéee le mot de passe (hash, sale)
-    db.query(`SELECT password FROM user 
-        WHERE email=?`, 
-        [emailUser], 
+    //* On récupère dans la base de donnéee le mot de passe des informations sur l'utilisateur
+    //* Pour l'utilisateur --> userId, témoin de première connexion de l'utilisateur, password
+    db.query(dbRequest.login(emailUser), function(error, results) {
+           
+        //: Gestion des erreurs
+        if(error == null) {
 
-        function(error, results, fields) {
-            
-            //: Gestion des erreurs
-            if(error == null) {
+            //* On compare le mot de passe la requête à celui de la base de donnée
+            bcrypt.compare(passwordUser, results[0].password)    
 
-                //* On compare le mot de passe la requête à celui de la base de donnée
-                bcrypt.compare(passwordUser, results[0].password)    
+            //: Promesse
+            .then(valid => {
+                
+                //* Si le mot de passe ne correspond pas ...
+                if(valid === false){
 
-                //: Promesse
-                .then(valid => {
-                    
-                    //* Si le mot de passe ne correspond pas ...
-                    if(valid === false){
+                    //* On envoie une réponse d'échec
+                    res.status(401).json({message: "Le mot de passe est incorrect !"})
+                
+                //* Sinon ...
+                } else {
 
-                        //* On envoie une réponse d'échec
-                        res.status(401).json({message: "Le mot de passe est incorrect !"})
-                    
-                    //* Sinon ...
-                    } else {
+                    //* On envoie une réponse de succès
+                    //* userId, token (6 mois) et témoin de première connexion
+                    res.status(200).json({
+                        userId: results[0].userId,
+                        token: jwt.sign({userId: results[0].userId}, process.env.JWT_SECRET, {expiresIn: 6 * 31 * 24 * 60 * 60}),
+                        firstConnection: results[0].firstConnection
+                    })
+                
+                }
 
-                        //* On récupère le "userId" de la personne et le témoin de première connexion
-                        db.query(`SELECT userId, firstConnection FROM user 
-                            WHERE email=?`, 
-                            [emailUser], 
+            }) 
 
-                            function(error, results, fields) {
+            //: Promesses
+            .catch(() => {res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})})
 
-                                //: Gestion des erreurs
-                                if(error == null) {
-
-                                    //* On envoie une réponse de succès
-                                    //* userId, token (6 mois) + témoin de première connexion
-                                    res.status(200).json({
-                                        userId: results[0].userId,
-                                        token: jwt.sign({userId: results[0].userId}, process.env.JWT_SECRET, {expiresIn: 6 * 31 * 24 * 60 * 60}),
-                                        firstConnection: results[0].firstConnection
-                                    })
-                                
-                                //: Gestion des erreurs
-                                } else {
-                                    res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
-                                }
-
-                            }
-                        )
-                    }
-
-                }) 
-
-                //: Promesses
-                .catch(() => {res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})})
-
-            //: Gestion des erreurs
-            } else {
-                res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
-            }
+        //: Gestion des erreurs
+        } else {
+            res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
         }
-    )    
+    })    
 }
 
 //! Fonction qui permet de bloquer l'accès au site sans connexion préalable (USER)
-exports.access = (req, res, next) => {
+exports.access = (req, res) => {
 
     //: Gestion des erreurs
     try {

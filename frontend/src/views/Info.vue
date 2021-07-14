@@ -46,14 +46,14 @@
             <!---- Bouton de soumission ---->
             <button @click="updateInfo">{{buttonText}}</button>
         </div>
-
-        <!---- Composant Erreur (si il y a des erreurs) ---->
-        <Error/>
         
         <!---- Lien de retour à l'accueil ---->
         <router-link class="info__after" :to="{name: 'Multimedia'}">
             <span>Je ferais ça plus tard</span>
         </router-link>
+
+        <!---- Composant Erreur (si il y a des erreurs) ---->
+        <Error class="info__erreur"></Error>
     
     </div>
 </div>
@@ -383,7 +383,7 @@ export default {
                 background-color: $button-action;
                 height: 50px;
                 width: 100%;
-                margin: 20px 0;
+                margin: 20px 0 5px 0;
                 box-shadow: $box-shadow-button;
                 cursor: pointer;
                 @media screen and (max-width: $step-2){
@@ -400,6 +400,10 @@ export default {
                 color: black;
                 text-decoration: underline;
             }
+        }
+
+        &__erreur{
+            margin-top: 15px;
         }
         
     }

@@ -5,7 +5,7 @@ const router = express.Router()
 const agoraController = require("../controllers/agora-C")
 //! Middleware qui vérifie le token et les autorisations
 const auth = require("../middlewares/auth")
-//! Middleware qui permet de vérifier si un titre de post est valide
+//! Middleware qui permet de vérifier si une publication (Agora) est valide
 const agoraVerif = require("../middlewares/agoraVerif")
 
 //! Routes qui permet de récupérer plusieurs contenus agora (USER)

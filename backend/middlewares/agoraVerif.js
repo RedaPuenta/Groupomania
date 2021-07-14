@@ -1,24 +1,45 @@
-//! Middleware qui permet de vérifier si un titre de post est valide
+//! Middleware qui permet de vérifier si une publication (Agora) est valide
 module.exports = (req, res, next) => {
-    
+ 
+    //* On récupère le titre contenu dans le corps de la requête
     const field = req.body.titre
-    const regexAntiInjection = /[<>}{;_|^*~$]/
     
-    if(field == ""  || !/[a-z]/.test(field)){
+    //* On déclare le regex "ANTI-INJECTION"
+    const regexAntiInjection = /[<>}{_|^*~$]/
+
+    //* On configure un tableau contenant tout les conditions à vérifier et leur réponse
+    const cas = [
+        {condition: field == "" || !/[a-zA-Z]/.test(field), réponse: `Vous avez oublié de renseigner un titre`},
+        {condition: regexAntiInjection.test(field), réponse: `Certains caractères contenu dans votre titre ne sont pas acceptables`},
+        {condition: field.length > 100, réponse: `Votre titre est trop long (max 100 caractères)`}
+    ]
+
+    //* On configure un système de point
+    const valid = cas.length
+    var points = 0
+
+    //* Pour chaque conditions ...
+    for (let i = 0; i < cas.length; i++) {
         
-        res.status(400).json({message: "Vous avez oublié de renseigner un titre"})
+        //* Si la condition n'est pas respecter ...
+        if(cas[i].condition){
 
-    } else if (regexAntiInjection.test(field)) {
+            //* On envoie une réponse d'échec personnalisée
+            res.status(400).json({message: cas[i].réponse})
+            break 
         
-        res.status(400).json({message: "Certains caractères contenu dans votre titre ne sont pas acceptables"})
-    
-    } else if (field.length > 100){
+        //* Si tout est correct, on ajoute 1 point
+        } else {
+            points++
+        }
+        
+    }
+    //* Si les points correpondent à la taille du tableau des conditions à vérifier ...
+    if(valid == points) {
 
-        res.status(400).json({message: "Votre titre est trop long (max 100 caractères)"})
-
-    } else {
-
+        //* On passe à la suite
         next()
+
     }
     
 }

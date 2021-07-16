@@ -1,7 +1,14 @@
 <template>
     <div> 
+
+        <!---- Message qui indique qu'il n'y a pas de post ---->
+        <div class="no-post" v-if="noPost == true">
+            <span class="no-post__text">{{noPostText}}</span>
+            <i class="no-post__icon far fa-frown-open"></i>
+        </div>
+
         <!---- Un post ---->
-        <div :class="{media_small: small, media_big: big}" v-for="(item, index) in data" :key="index" :id="item.postId" class="neo media">
+        <div name="media" :class="{media_small: small, media_big: big}" v-for="(item, index) in data" :key="index" :id="item.postId" class="neo media">
 
             <!---- Bouton "Supprimer le post" (Scroll/Focus) ---->
             <div class="media__edit">
@@ -50,13 +57,21 @@
                     <div class="media__influence__note__item">
                         <div class="media__influence__note__item__text">
                             <span name="totalLikes">{{item.likes}}</span> 
-                            <span> engouements</span>
+                            <span> engouement<span name="textLikes"></span></span>
                         </div>
-                        <span class="media__influence__note__item__text">{{item.comments}} réactions</span>
+                        <div class="media__influence__note__item__text" >
+                            <span name="totalComments">{{item.comments}}</span> 
+                            <span> réaction<span name="textComments"></span></span>
+                        </div>
                     </div>
                     
                 </div>
 
+            </div>
+
+            <!---- Date du post (Scroll/Focus) ---->
+            <div class="media__date">
+               <span>Il y a {{item.datePost}}</span>
             </div>
 
             <div :class="{reaction_small: small, reaction_big: big}" class="media__reaction">
@@ -67,18 +82,20 @@
                     <div name="comments" v-for="(comments, indexList) in item.commentsList" :key="indexList" :data-commentsId="comments.commentsId" :data-myComments="comments.my_comments" class="media__reaction__view">
                         <div :class="{comments_small: small, comments_big: big}" class="media__reaction__view__comments">  
                             <!---- Auteur ----> 
-                            <div class="media__reaction__view__comments__name">
+                            <router-link :to="{name: 'Profil', params: {id: comments.userId}}" class="media__reaction__view__comments__name">
                                 <img class="avatar" :src="comments.avatar" alt="Avatar de profil">
                                 <span class="media__reaction__view__comments__name--user">{{comments.firstName}}.{{comments.lastName}} :</span>
-                            </div>
+                            </router-link>
                             <!---- Message ---->
                             <span :class="{phrase_small: small}" class="media__reaction__view__comments__phrase">{{comments.reaction}}</span>
                         </div>
-                        <div>
+                        <div class="media__reaction__view__opt">
+                            <!---- Date du commentaire ---->
+                            <span class="media__reaction__view__opt__date">{{comments.dateComments}}</span>
                             <!---- Bouton "supprimer commentaire" ---->
-                            <button class="media__reaction__view__delete">
-                                <div @click="deleteComments" class="media__reaction__view__delete__self" :data-commentsId="comments.commentsId"></div>
-                                <i class="media__reaction__view__delete__icon fas fa-trash-alt fa-sm"></i>
+                            <button class="media__reaction__view__opt__delete">
+                                <div @click="deleteComments" class="media__reaction__view__opt__delete__self" :data-commentsId="comments.commentsId"></div>
+                                <i class="media__reaction__view__opt__delete__icon fas fa-trash-alt fa-sm"></i>
                             </button>
                         </div>
                     </div>
@@ -100,7 +117,7 @@
             <form v-if="focus == true" @submit.prevent="commentPost" class="media__write">
                 <textarea name="textArea" v-model="comments" rows="2"></textarea>
                 <button type="submit">
-                    <i class="fas fa-seedling fa-lg"></i>
+                    <i class="fas fa-rocket fa-lg"></i>
                 </button>
             </form>
 
@@ -129,7 +146,14 @@ export default {
             small: false,
             big: false,
             //! Variable qui contient le commentaire du visiteur dans le formulaire
-            comments: ""
+            comments: "",
+            //! Variable qui permet d'activer/désactiver le message indiquant qu'il n'y a pas de post
+            noPost: false,
+            //! Ensemble de variables qui vont constituer le texte à l'intérieur du message
+            noPostText: "",
+            noPostTextActuality: "Le fil d'actualité est vide ...",
+            noPostTextMyPost:  "Vous n'êtes l'auteur d'aucune publication ...",
+            noPostTextFavori: "Vous n'avez malheureusement pas de préférence ...",
         }
     },
 
@@ -162,7 +186,13 @@ export default {
             
             this.$axios.delete(`/agora/post/${postId}`)
             .then(() => {
-                document.location.reload()
+
+                if(this.focus == false){
+                    document.location.reload()
+                } else if(this.focus == true){
+                    this.$router.push({name: "Agora"})
+                }
+
             })
             .catch((error) => {
                 console.log(error)
@@ -183,6 +213,7 @@ export default {
 
                 let buttonLikes = document.getElementsByName("buttonLikes")[position]
                 let totalLikes = document.getElementsByName("totalLikes")[position]
+                let textLikes = document.getElementsByName("textLikes")[position]
                 
                 if(likes == 1) {
                     buttonLikes.classList.add("true-action")
@@ -192,6 +223,12 @@ export default {
                     buttonLikes.classList.remove("true-action")
                     buttonLikes.classList.add("false-action")
                     totalLikes.textContent = `${parseInt(totalLikes.textContent) - 1}`
+                }
+
+                if(parseInt(totalLikes.textContent) > 1){
+                    textLikes.textContent = "s"
+                } else {
+                    textLikes.textContent = ""
                 }
                 
             })
@@ -266,6 +303,28 @@ export default {
             } else {
                 this.big = true
             }
+        },
+        //! Fonction qui permet de conjuguer les termes associés aux likes et aux commentaires
+        buildConjugaison: function(){
+
+            const media = document.getElementsByName("media")
+            let totalLikes = document.getElementsByName("totalLikes")
+            let textLikes = document.getElementsByName("textLikes")
+            let totalComments = document.getElementsByName("totalComments")
+            let textComments = document.getElementsByName("textComments")
+
+            for (let i = 0; i < media.length; i++) {
+                
+                if(parseInt(totalComments[i].textContent) > 1){
+                    textComments[i].textContent = "s"
+                }
+
+                if(parseInt(totalLikes[i].textContent) > 1){
+                    textLikes[i].textContent = "s"
+                }
+                
+            }
+            
         },
         //! Fonction qui permet de rendre les boutons "likes" actif/désactif grâce aux keys "my_likes" de la réponse API
         buildMyLike: function(){
@@ -342,14 +401,13 @@ export default {
                 for (let i = 0; i < comments.length; i++) {
                     
                     if(parseInt(comments[i].dataset.mycomments) == 0){
-
-                        comments[i].removeChild(comments[i].children[1])
+                        
+                        comments[i].children[1].removeChild(comments[i].children[1].children[1])
 
                     }
                     
                 }
             }
-
         },
         //! Fonction qui permet d'inscrire un message dans la partie "réaction" et retirer le bouton "more" quand celle-ci est vide
         buildBlockReaction: function(){
@@ -412,9 +470,29 @@ export default {
             }
 
         },
+        //! Fonction qui entreprend une action en cas d'erreur pendant l'appel à l'API
+        catchDecision: function(){
+
+            if(this.focus == false) {
+
+                switch(this.preference){
+                    case 1: this.noPostText = this.noPostTextActuality
+                    break
+                    case 2: this.noPostText = this.noPostTextMyPost
+                    break
+                    case 3: this.noPostText = this.noPostTextFavori
+                }
+
+                this.noPost = true
+                
+            } else if (this.focus == true) {
+                this.$router.push({name: "Agora"})
+            }  
+        },
         //! Fonction qui contient toute la logique de rendu
         RENDU_MONTAGE_FONCTION: function(){
-            const adresse = this.apiAdresse()
+
+            const adresse =  this.apiAdresse()
             const body = this.apiBody()
             
             this.$axios.post(adresse, body)
@@ -424,6 +502,10 @@ export default {
             })
             .then((privilege) => {
                 this.buildClass()
+                return privilege
+            })
+            .then((privilege) => {
+                this.buildConjugaison()
                 return privilege
             })
             .then((privilege) => {
@@ -447,9 +529,10 @@ export default {
             .then(() => {
                 this.buildHistory()
             })
-            .catch((error) => {
-                console.log(error)
+            .catch(() => {
+                this.catchDecision()
             })
+        
         }
     },   
 
@@ -458,11 +541,15 @@ export default {
         //! "Préférence" change ...
         preference: function(){
 
+            //! On réinitialise la variable indiquant si il y a une/des publications
+            this.noPost = false
+
             //! On supprime tout les posts
             this.data = []
         
             //! On applique le rendu de l'affichage des posts
             this.RENDU_MONTAGE_FONCTION()
+
         }
     },
     
@@ -491,6 +578,27 @@ export default {
     @import "../sass/global.scss";
 
     $step-1: 1100px;
+
+    .no-post{
+        height: calc(100vh - 300px);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        &__text{
+            text-align: center;
+            width: 90%;
+            font-weight: bold;
+            font-size: rem(25px);
+        }
+
+        &__icon{
+            margin-top: 30px;
+            font-size: rem(100px);
+        }
+    }
 
     .media__edit:hover .media__edit__more{
         background-color: white;
@@ -628,7 +736,6 @@ export default {
                 text-align: center;
                 width: 100%;
                 color: $color-primary;
-                text-shadow: 1px 1px black, -1px -1px white;
                 font-size: rem(23px);
                 font-weight: 900;
             }
@@ -775,6 +882,24 @@ export default {
             }
         }
 
+        &__date{
+            width: 100%;
+            margin-top: -7px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0 0 30px 30px;
+
+            span{
+                text-shadow: 0.5px 0.5px rgb(255, 255, 255), -0.5px -0.5px rgb(255, 255, 255);
+                font-weight: 900;
+                color: rgba(0, 0, 0, 0.75);
+                font-size: rem(12px);
+            }
+            
+        }
+
         .reaction_small{
             height: 135px;
             border-radius: 0 0 30px 30px;
@@ -782,23 +907,23 @@ export default {
 
         .reaction_big{
             height: 180px;
-            overflow-x: scroll;
+            overflow-y: scroll;
         }
 
         &__reaction{
             width: 100%;
             background-color: $color-third;
-            box-shadow: $box-shadow-inner;
+            box-shadow: $box-shadow-inner2;
             padding: 10px 10px 0 10px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             
-
             &__view{
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
+                align-items: flex-start;
+                margin-bottom: 8px;
 
                 .comments_small{
                     display: flex;
@@ -811,7 +936,6 @@ export default {
                 }
 
                 &__comments{
-                    margin-bottom: 5px;
                     overflow: hidden;
                     
                     &__name{
@@ -825,6 +949,7 @@ export default {
                             padding-left: 5px;
                             white-space: nowrap;
                             line-height: 20px;
+                            color: $color-primary;
                         }
                     }
 
@@ -835,41 +960,55 @@ export default {
                     }
 
                     &__phrase{
+                        word-break: break-all;
                         font-size: rem(13px);
                         line-height: 20px;
                     }
 
                 }
 
-                &__delete{
+                &__opt{
+                    margin: 0 5px;
                     height: 20px;
-                    width: 20px;
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    background-color: $button-action;
-                    margin: 0 5px;
-                    color: $button-action-inner;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: $box-shadow-button;
 
-                    &__self{
-                        width: 100%;
-                        height: 100%;
-                        position: absolute;
-                        top: 0;
-                        right: 0;
-                        bottom: 0;
-                        left: 0;
+                    &__date{
+                        font-weight: bold;
+                        font-size: rem(12px);
                     }
 
-                    &__icon{
-                        color: red;
-                        height: 11px;
-                        width: 11px;
+                    &__delete{
+                        margin-left: 5px;
+                        height: 20px;
+                        width: 20px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        background-color: $button-action;
+                        color: $button-action-inner;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        position: relative;
+                        overflow: hidden;
+                        box-shadow: $box-shadow-button;
+
+                        &__self{
+                            width: 100%;
+                            height: 100%;
+                            position: absolute;
+                            top: 0;
+                            right: 0;
+                            bottom: 0;
+                            left: 0;
+                        }
+
+                        &__icon{
+                            color: red;
+                            height: 11px;
+                            width: 11px;
+                        }
                     }
                 }
             }
@@ -910,7 +1049,7 @@ export default {
                 resize: none;
                 width: 100%;
                 padding: 10px 15px 15px 15px;
-                box-shadow: $box-shadow-inner;
+                box-shadow: $box-shadow-inner2;
                 border-radius: 0 0 20px 0;
                 background-color: $color-third;
             }

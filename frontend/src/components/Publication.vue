@@ -476,7 +476,7 @@ export default {
                     padding: 10px 10px;
                     background-color: $color-third;
                     text-align: center;
-                    box-shadow: $box-shadow-inner;
+                    box-shadow: $box-shadow-inner2;
                 }
 
                 &__submit{

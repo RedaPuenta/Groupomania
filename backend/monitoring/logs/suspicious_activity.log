@@ -1,0 +1,2 @@
+Le 15/6/2021 à 23:55:20:9 [::1] [POST] http://localhost:3000/api/account/login [401-Unauthorized] [{"email":"salim@gmail.com","password":""}]
+Le 16/6/2021 à 0:30:40:810 [::1] [POST] http://localhost:3000/api/multimedia/post [400-Bad Request] [{"legend":"","userId":"bb59ae00-e4f1-11eb-97a1-f5a011f53c58"}]

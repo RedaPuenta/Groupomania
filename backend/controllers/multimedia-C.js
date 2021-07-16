@@ -2,6 +2,8 @@ const idGenerator = require ("uuid")
 const db = require("../mysql/connectDB")
 const dbRequest = require("../mysql/dbRequest")
 const fs = require("fs")
+const datefns = require("date-fns")
+const { fr } = require("date-fns/locale")
 
 //! Fonction qui permet de récupérer plusieurs contenus multimédia (USER)
 exports.recover = (req, res) => {
@@ -29,54 +31,81 @@ exports.recover = (req, res) => {
                 //* Fil d'actualité
                 case 1 : 
                     var sqlPreference = all 
+                    var namePreference = "Fil d'actualité"
                 break
 
                 //* Mes publications
                 case 2 :
                     var sqlPreference = `SELECT * FROM (${all}) my WHERE userId = '${userId}'`
+                    var namePreference = "Mes publications"
                 break
 
                 //* Mes préférées
                 case 3 : 
                     var sqlPreference = `SELECT * FROM (${all}) my WHERE my_like = 1`
+                    var namePreference = "Mes préférées"
                 break
                 
             }
 
             //* On récupère dans la base de donnée les posts et les préférences de l'utilisateur liés à chacun de ces posts (selon le filtre)
             db.query(sqlPreference, function(error, results){
-                    
+                
                 //: Gestion des erreurs
                 if(error == null) {
+                    
+                    //* Si le résultat n'est pas vide ...
+                    if(results.length !== 0){
+                    
+                        //* On créer une variable qui va accueillir un résultat final
+                        var new_results = []
+                        //* On détermine le nombre de post récupérer (pour la boucle ci dessous)
+                        var nombreResults = results.length - 1
 
-                    //* On créer une variable qui va accueillir un résultat final
-                    var new_results = []
-                    //* On détermine le nombre de post récupérer (pour la boucle ci dessous)
-                    var nombreResults = results.length - 1
+                        //* Pour chaque post ...
+                        for (let i = 0; i < results.length; i++) {
 
-                    //* Pour chaque post ...
-                    for (let i = 0; i < results.length; i++) {
+                            //* On récupère la liste de commentaire associés (maximum 3)
+                            //-SELECT --> commentsId, userId, avatar, firstName, lastName, reaction, my_comments, dateComments
+                            db.query(dbRequest.commentsList(userId, results[i].postId, 3), function(error, comments){
 
-                        //* On récupère la liste de commentaire associés (maximum 3)
-                        //-SELECT --> commentsId, userId, avatar, firstName, lastName, reaction, my_comments, dateComments
-                        db.query(dbRequest.commentsList(userId, results[i].postId, 3), function(error, comments){
+                                //* Pour chaque commentaire ...
+                                for (let i = 0; i < comments.length; i++) {
+                                    
+                                    //* On transforme la date du commentaire
+                                    comments[i].dateComments = datefns.formatDistanceStrict(Date.now(), comments[i].dateComments, {addSuffix: false, locale: fr})
+                                    comments[i].dateComments = comments[i].dateComments.split(" ")[0] + comments[i].dateComments.split(" ")[1].slice(0,1)
+                                    
+                                }
 
-                            //* On injecte ses commentaires dans le résultat (maximum 3)
-                            results[i].commentsList = comments
-                            //* On contruit l'url du fichier associées 
-                            results[i].media = `${req.protocol}://${req.get('host')}/media/${results[i].media}`
-                            //* On donne une position (utile pour VUE.JS)
-                            results[i].position = i
-                            //* Et on monte le résultat final
-                            new_results.push(results[i])
-                            
-                            //* Si il n'y a plus de post ...
-                            if(i == nombreResults){
+                                //* On injecte les commentaires du post dans le résultat (maximum 3)
+                                results[i].commentsList = comments
 
-                                //* On envoie une réponse de succès
-                                res.status(200).json({posts: new_results, privilege: privilege})
-                            }
-                        })
+                                //* On transforme la date du post
+                                results[i].datePost = datefns.formatDistanceStrict(Date.now(), results[i].datePost, {addSuffix: false, locale: fr})
+                                //* On contruit l'url du fichier associées au post
+                                results[i].media = `${req.protocol}://${req.get('host')}/media/${results[i].media}`
+                                //* On donne une position au post (utile pour VUE.JS)
+                                results[i].position = i
+
+                                //* Et on monte le résultat final
+                                new_results.push(results[i])
+                                
+                                //* Si il n'y a plus de post ...
+                                if(i == nombreResults){
+
+                                    //* On envoie une réponse de succès
+                                    res.status(200).json({posts: new_results, privilege: privilege})
+                                }
+                            })
+
+                        }
+                    
+                    //* Sinon, si le résultat est vide ...
+                    } else {
+
+                        //* On envoie une réponse d'échec
+                        res.status(404).json({message: `Il n'y a pas de publication dans l'onglet (${namePreference})`})
                     }
                 
                 //: Gestion des erreurs
@@ -122,31 +151,53 @@ exports.recoverOne = (req, res) => {
             db.query(sqlRecoverOne, function(error, results) {
                     
                 //: Gestion des erreurs
-                if(error == null && results[0] !== undefined) {
+                if(error == null) {
                     
-                    //* On récupère la liste de commentaire associés à ce post (tout)
-                    //-SELECT --> commentsId, userId, avatar, firstName, lastName, reaction, my_comments, dateComments
-                    db.query(dbRequest.commentsList(userId, postId, 'none'), function(error, comments){
+                    //* Si le résultat n'est pas vide ...
+                    if(results.length !== 0){
 
-                        //: Gestion des erreurs
-                        if(error == null) {
+                        //* On récupère la liste de commentaire associés à ce post (tout)
+                        //-SELECT --> commentsId, userId, avatar, firstName, lastName, reaction, my_comments, dateComments
+                        db.query(dbRequest.commentsList(userId, postId, 'none'), function(error, comments){
 
-                            //* On contruit l'url du fichier associés à ce post
-                            results[0].media = `${req.protocol}://${req.get('host')}/media/${results[0].media}`
-                            //* On injecte les commentaires de ce post dans le résultat (tout)
-                            results[0].commentsList = comments
-                            //* On donne une position (utile pour VUE.JS)
-                            results[0].position = 0
+                            //: Gestion des erreurs
+                            if(error == null) {
 
-                            //* On envoie une réponse de succès
-                            res.status(200).json({posts: results, privilege: privilege})
-                        
-                        //: Gestion des erreurs
-                        } else {
-                            res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
-                        }
+                                //* Pour chaque commentaire ...
+                                for (let i = 0; i < comments.length; i++) {
+                                    
+                                    //* On transforme la date du commentaire
+                                    comments[i].dateComments = datefns.formatDistanceStrict(Date.now(), comments[i].dateComments, {addSuffix: false, locale: fr})
+                                    comments[i].dateComments = comments[i].dateComments.split(" ")[0] + comments[i].dateComments.split(" ")[1].slice(0,1)
+                                    
+                                }
+
+                                //* On injecte les commentaires du post dans le résultat (tout)
+                                results[0].commentsList = comments
+
+                                //* On transforme la date du post
+                                results[0].datePost = datefns.formatDistanceStrict(Date.now(), results[0].datePost, {addSuffix: false, locale: fr})
+                                //* On contruit l'url du fichier associés au post
+                                results[0].media = `${req.protocol}://${req.get('host')}/media/${results[0].media}`
+                                //* On donne une position au post (utile pour VUE.JS)
+                                results[0].position = 0
+                                
+                                //* On envoie une réponse de succès
+                                res.status(200).json({posts: results, privilege: privilege})
                             
-                    })
+                            //: Gestion des erreurs
+                            } else {
+                                res.status(500).json({message: "Erreur interne du serveur, veuillez réessayer plus tard"})
+                            }
+                                
+                        })
+                    
+                    //* Sinon, si le résultat est vide ...
+                    } else {
+
+                        //* On envoie une réponse d'échec
+                        res.status(404).json({message: `Cette publication n'existe pas`})
+                    }
                     
                 //: Gestion des erreurs
                 } else {

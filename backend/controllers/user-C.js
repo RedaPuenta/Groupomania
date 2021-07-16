@@ -1,6 +1,8 @@
 const db = require("../mysql/connectDB")
 const dbRequest = require("../mysql/dbRequest")
 const fs = require("fs")
+const datefns = require("date-fns")
+const { fr } = require("date-fns/locale")
 
 //! Fonction qui permet de récupérer toutes les informations relatives à la page "info" (USER + ADMIN)
 exports.info = (req, res) => {
@@ -51,9 +53,9 @@ exports.friends = (req, res)  => {
     const userId = req.params.userId
     
     //* On récupère dans la base de données des informations sur tout les autres utilisateurs (sauf celui qui demande)
-    //-SELECT --> firstName, lastName, bio, avatar, userId + nombre de contenu "agora" et "multimedia"
+    //-SELECT --> firstName, lastName, bio, avatar, userId, privilege + nombre de contenu "agora" et "multimedia"
     db.query(dbRequest.recoverForFriends(userId), function(error, results){
-
+        
         //: Gestion des erreurs
         if(error == null) {
 
@@ -89,8 +91,11 @@ exports.profil = (req, res)  => {
             let score_reaction = (parseInt(results[0].likes) * pts_likes) + (parseInt(results[0].comments) * pts_comments)
             let score_participation = (parseInt(results[0].multimedia) * pts_multimedia) + (parseInt(results[0].forum) * pts_forum)
 
+            //* On tranforme la date associé au profil
+            results[0].dateCreation = datefns.formatDistanceStrict(Date.now(), results[0].dateCreation, {addSuffix: false, locale: fr})
+
             //* On envoie une réponse de succès
-            //* avatar, nom, prénom, bio + nombre de contenu "agora" et "multimedia" + score de "réaction" et de "participation"
+            //-SELECT --> firstName, lastName, bio, avatar, userId, dateCreation, privilege + nombre de contenu "agora" et "multimedia" + nombre de "like" et de "commentaire" 
             res.status(200).json(
                 [
                     {
@@ -101,7 +106,8 @@ exports.profil = (req, res)  => {
                         lastName: results[0].lastName,
                         multimedia: results[0].multimedia,
                         forum: results[0].forum,
-                        bio: results[0].bio
+                        bio: results[0].bio,
+                        dateCreation: results[0].dateCreation
                     }
                 ]
             )

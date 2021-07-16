@@ -20,7 +20,7 @@ module.exports = morgan((morganStyle, req, res) => {
     //* Ici, on définie deux types de log spécifique (base + information complémentaire)
     let logWithBody = log + ` [${JSON.stringify(req.body)}]`
 
-    //* SI le code de statut de la requête est supérieur ou égal à 500 ...
+    //* SI le code de statut de la requête est un code d'erreur serveur ...
     if(parseInt(res.statusCode) >= 500){
 
         //* On écrit un log (base) dans le fichier "error_serveur.log"
@@ -28,8 +28,8 @@ module.exports = morgan((morganStyle, req, res) => {
             if (error) console.log(error)
         })
 
-    //* SINON SI la méthode de la requête est différente de "OPTIONS" et que le code de statut de la requête est strictement inférieur à 400 ...
-    } else if (req.method !== "OPTIONS" && parseInt(res.statusCode) >= 400){
+    //* SINON SI la méthode de la requête est différente de "OPTIONS" et que le code de statut de la requête est un code d'erreur client (sauf 404) ...
+    } else if (req.method !== "OPTIONS" && ((parseInt(res.statusCode) >= 400 && parseInt(res.statusCode) < 404) || parseInt(res.statusCode) > 404)){
 
         //* On écrit un log spécifique (avec le corps) dans le fichier "suspicious_activity.log"
         fs.appendFile(`${appRootPath}/monitoring/logs/suspicious_activity.log`, logWithBody + "\n", (error) => {

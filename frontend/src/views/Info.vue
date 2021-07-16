@@ -235,13 +235,15 @@ export default {
             width: 100%;
             height: 130px;
             overflow-x: scroll;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
             @media screen and (max-width: $step-2){
                 height: 100%;
             }
 
             &__list{
-                padding: 15px;
-                width: 100%;
+                padding: 15px 0px;
                 height: 100%;
                 display: flex;
                 justify-content: center;

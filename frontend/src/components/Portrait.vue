@@ -24,7 +24,7 @@
 
                     <div class="portrait__user__main__info__bio">
                         <div class="portrait__user__main__info__bio__cache">
-                            <span class="portrait__user__main__info__bio__cache__text">{{item.bio}}</span>
+                            <span :class="{text_friends: friends}" class="portrait__user__main__info__bio__cache__text">{{item.bio}}</span>
                         </div>
                     </div>
 
@@ -58,7 +58,7 @@
             </div>
 
             <!----- Score de réactions et de participation (Profil) [Desktop/Mobile] ----->
-            <div v-if="mode == 'Profil'" class="portrait__user__score">
+            <div v-if="mode == 'Profil'" class="neo-inverse portrait__user__score">
 
                 <div class="portrait__user__score__glass"></div>
 
@@ -72,6 +72,10 @@
                     <span>Score de participations</span>
                 </div>
 
+            </div>
+
+            <div class="portrait__user__date" v-if="mode == 'Profil'">
+                <span>Inscrit depuis {{item.dateCreation}}</span>
             </div>
 
         </div>
@@ -312,6 +316,13 @@ export default {
                                 overflow: initial;
                             }
 
+                            .text_friends{
+                                transform: translateY(-100px);
+                                @media screen and (max-width: $step-2){
+                                    transform: translateY(0px);
+                                }
+                            }
+
                             &__text{
                                 top: 0;
                                 bottom: 0;
@@ -326,7 +337,6 @@ export default {
                                 background-color: rgb(255, 255, 255);
                                 border-radius: 0 0 10px 10px;
                                 padding: 15px 8px 0 8px;
-                                transform: translateY(-100px);
                                 z-index: 1;
                                 transition: transform 0.8s ease-in-out;
                                 color: $color-primary;
@@ -451,7 +461,6 @@ export default {
                 display: flex;
                 justify-content: space-evenly;
                 align-items: center;
-                box-shadow: inset 4px 4px 20px rgb(136, 136, 136), inset -4px -4px 20px rgb(136, 136, 136);
                 position: relative;
                 margin-bottom: 20px;
                 @media screen and(max-width: $step-2){
@@ -495,6 +504,19 @@ export default {
                         }
                     }
                 }
+            }
+
+            &__date{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 5px;
+
+                span{
+                    font-weight: bold;
+                    font-size: rem(14px);
+                }
+                
             }
         }
     }

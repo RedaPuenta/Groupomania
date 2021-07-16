@@ -25,12 +25,12 @@ exports.recoverForInfo = function(userId){
 }
 
 //! Requête qui permet récupèrer des infos sur un utilisateur (PAGE FRIENDS)
-//-SELECT --> firstName, lastName, bio, avatar, userId + nombre de contenu "agora" et "multimedia"
+//-SELECT --> firstName, lastName, bio, avatar, userId, privilege + nombre de contenu "agora" et "multimedia"
 //~WITH --> userId
 exports.recoverForFriends = function(userId){
     return`
     SELECT req1.*, COUNT(forum.postId) As forum FROM (
-        SELECT user.*, COUNT(multimedia.postId) AS multimedia
+        SELECT user.avatar, user.bio, user.firstName, user.lastName, user.userId, user.privilege, COUNT(multimedia.postId) AS multimedia
         FROM user
         LEFT JOIN multimedia
         ON multimedia.userId = user.userId
@@ -43,14 +43,14 @@ exports.recoverForFriends = function(userId){
 }
 
 //! Requête qui permet récupèrer des infos sur un utilisateur (PAGE PROFIL)
-//-SELECT --> firstName, lastName, bio, avatar, userId + nombre de contenu "agora" et "multimedia" + nombre de "like" et de "commentaire" 
+//-SELECT --> firstName, lastName, bio, avatar, userId, dateCreation, privilege + nombre de contenu "agora" et "multimedia" + nombre de "like" et de "commentaire" 
 //~WITH --> userId
 exports.recoverForProfil = function(userId){
     return `
     SELECT req3.*, COUNT(comments.userId) AS likes FROM (
         SELECT req2.*, COUNT(likes.userId) AS comments FROM (
             SELECT req1.*, COUNT(forum.postId) As forum FROM (
-                SELECT user.*, COUNT(multimedia.postId) AS multimedia
+                SELECT user.avatar, user.bio, user.dateCreation, user.firstName, user.lastName, user.userId, user.privilege, COUNT(multimedia.postId) AS multimedia
                 FROM user
                 LEFT JOIN multimedia
                 ON multimedia.userId = user.userId

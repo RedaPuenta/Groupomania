@@ -16,7 +16,7 @@ exports.info = (req, res) => {
         //: Gestion des erreurs
         if(error == null){
 
-            //* On stock le privilège de l'utilidateur
+            //* On stock le privilège de l'utilisateur
             const privilege = results[0].privilege
 
             //* On récupère dans la base de donnée des informations sur l'utilisateur
@@ -25,6 +25,9 @@ exports.info = (req, res) => {
 
                 //: Gestion des erreurs
                 if(error == null) {
+                    
+                    //* On contruit l'avatar de l'utilisateurs
+                    results[0].avatar = `${req.protocol}://${req.get('host')}/media/avatar/${results[0].avatar}`
 
                     //* Et on envoie une réponse de succès
                     res.status(200).json({info: results, privilege: privilege})
@@ -59,8 +62,23 @@ exports.friends = (req, res)  => {
         //: Gestion des erreurs
         if(error == null) {
 
-            //* Et on envoie une réponse de succès
-            res.status(200).json(results)
+            //* Si le résultat n'est pas vide ...
+            if(results.length !== 0){
+
+                //* On contruit l'avatar des utilisateurs
+                results.forEach(element => {
+                    element.avatar = `${req.protocol}://${req.get('host')}/media/avatar/${element.avatar}`
+                });
+                
+                //* Et on envoie une réponse de succès
+                res.status(200).json(results)
+            
+            //* Sinon, si le résultat est vide ...
+            } else {
+
+                //* On envoie une réponse d'échec
+                res.status(404).json({message: "Vous n'avez pas de camarade car vous êtes le seul inscrit"})
+            }
 
         //: Gestion des erreurs
         } else {
@@ -94,6 +112,9 @@ exports.profil = (req, res)  => {
             //* On tranforme la date associé au profil
             results[0].dateCreation = datefns.formatDistanceStrict(Date.now(), results[0].dateCreation, {addSuffix: false, locale: fr})
 
+            //* On contruit l'avatar de l'utilisateur
+            results[0].avatar = `${req.protocol}://${req.get('host')}/media/avatar/${results[0].avatar}`
+        
             //* On envoie une réponse de succès
             //-SELECT --> firstName, lastName, bio, avatar, userId, dateCreation, privilege + nombre de contenu "agora" et "multimedia" + nombre de "like" et de "commentaire" 
             res.status(200).json(
@@ -124,7 +145,7 @@ exports.profil = (req, res)  => {
 exports.updateUser = (req, res) => {
 
     //* On récupère toutes les nouvelles informations
-    const avatar = req.body.avatar
+    const avatar = req.body.avatar.split("/avatar/")[1]
     const bio = req.body.bio
     const firstName = req.body.firstName
     const lastName = req.body.lastName

@@ -1,6 +1,12 @@
 <template>
     <div class="portrait">
 
+        <!---- Message qui indique qu'il n'y a pas de post (camarade) ---->
+        <div class="no-post" v-if="noPost == true">
+            <span class="no-post__text">{{noPostText}}</span>
+            <i class="no-post__icon far fa-grin-beam-sweat"></i>
+        </div>
+
         <!----- Un Item ----->
         <div v-for="(item, index) in user" :key="index" :class="{user_big: profil}" class="neo portrait__user">
 
@@ -94,7 +100,12 @@ export default {
             user: [],
             //! Ensemble de variables qui décide du type d'affichage (Profil et Friends)
             profil: false,
-            friends: false
+            friends: false,
+            //! Variable qui permet d'activer/désactiver le message indiquant qu'il n'y a pas de publication (camarade)
+            noPost: false,
+            //! Variable qui vont constituer le texte à l'intérieur du message
+            noPostText: "Pour l'instant, vous êtes le seul inscrit ..."
+
         }
     },
    
@@ -151,8 +162,12 @@ export default {
         .then(() => {
             this.buildClass()
         })
-        .catch((error) =>{
-            console.log(error)
+        .catch(() =>{
+            
+            if(this.mode == 'Friends'){
+                this.noPost = true
+            }
+
         })
     },
 
@@ -170,6 +185,27 @@ export default {
     // Check-point @media
     $step-1: 1000px;
     $step-2: 730px;
+
+    .no-post{
+        height: calc(100vh - 300px);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        &__text{
+            text-align: center;
+            width: 90%;
+            font-weight: bold;
+            font-size: rem(25px);
+        }
+
+        &__icon{
+            margin-top: 30px;
+            font-size: rem(100px);
+        }
+    }
 
     .portrait__user:hover .portrait__user__main__info__bio__cache__text{
         transform: translateY(0px);

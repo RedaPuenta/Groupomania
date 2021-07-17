@@ -1,0 +1,4 @@
+Le 17/6/2021 à 23:11:3:816 [::1] [GET] http://localhost:3000/api/user/info/null [498-unknown] [{}]
+Le 17/6/2021 à 23:11:3:818 [::1] [POST] http://localhost:3000/api/multimedia/recoverAll [498-unknown] [{"userId":null,"preference":1}]
+Le 17/6/2021 à 23:13:7:526 [::1] [GET] http://localhost:3000/api/user/info/null [498-unknown] [{}]
+Le 17/6/2021 à 23:13:7:527 [::1] [POST] http://localhost:3000/api/multimedia/recoverAll [498-unknown] [{"userId":null,"preference":1}]

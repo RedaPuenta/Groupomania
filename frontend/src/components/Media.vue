@@ -4,7 +4,7 @@
         <!---- Message qui indique qu'il n'y a pas de post ---->
         <div class="no-post" v-if="noPost == true">
             <span class="no-post__text">{{noPostText}}</span>
-            <i class="no-post__icon far fa-frown-open"></i>
+            <i class="no-post__icon far fa-grin-beam-sweat"></i>
         </div>
 
         <!---- Un post ---->
@@ -224,7 +224,7 @@ export default {
         },
         //! Fonction qui permet de liker un post
         likePost: function(event){
-            
+        
             const userId = localStorage.getItem("userId")
             const postId = event.target.parentElement.dataset.id
             

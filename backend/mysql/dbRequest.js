@@ -59,6 +59,7 @@ exports.recoverForFriends = function(userId){
 //-SELECT --> firstName, lastName, bio, avatar, userId, dateCreation, privilege + nombre de contenu "agora" et "multimedia" + nombre de "like" et de "commentaire" 
 //~WITH --> userId
 exports.recoverForProfil = function(userId){
+    
     return `
     SELECT req3.*, COUNT(comments.userId) AS likes FROM (
         SELECT req2.*, COUNT(likes.userId) AS comments FROM (

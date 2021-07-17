@@ -17,7 +17,7 @@ exports.signup = (req, res) => {
 
     //* On configure un userId, une bio (défaut) et un avatar (défaut)
     const userId = idGenerator.v1()
-    const avatar = `${req.protocol}://${req.get('host')}/media/avatar/default.png`
+    const avatar = `default.png`
     const bio = "Salut tout le monde !"
 
     //* On hash et on sale le mot de passe

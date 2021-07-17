@@ -75,6 +75,8 @@ exports.recover = (req, res) => {
                                     //* On transforme la date du commentaire
                                     comments[i].dateComments = datefns.formatDistanceStrict(Date.now(), comments[i].dateComments, {addSuffix: false, locale: fr})
                                     comments[i].dateComments = comments[i].dateComments.split(" ")[0] + comments[i].dateComments.split(" ")[1].slice(0,1)
+                                    //* On contruit l'avatar des utilisateurs
+                                    comments[i].avatar = `${req.protocol}://${req.get('host')}/media/avatar/${comments[i].avatar}`
                                     
                                 }
 
@@ -85,6 +87,8 @@ exports.recover = (req, res) => {
                                 results[i].datePost = datefns.formatDistanceStrict(Date.now(), results[i].datePost, {addSuffix: false, locale: fr})
                                 //* On contruit l'url du fichier associées au post
                                 results[i].media = `${req.protocol}://${req.get('host')}/media/${results[i].media}`
+                                //* On contruit l'avatar du propriétaire du post
+                                results[i].avatar = `${req.protocol}://${req.get('host')}/media/avatar/${results[i].avatar}`
                                 //* On donne une position au post (utile pour VUE.JS)
                                 results[i].position = i
 
@@ -169,7 +173,9 @@ exports.recoverOne = (req, res) => {
                                     //* On transforme la date du commentaire
                                     comments[i].dateComments = datefns.formatDistanceStrict(Date.now(), comments[i].dateComments, {addSuffix: false, locale: fr})
                                     comments[i].dateComments = comments[i].dateComments.split(" ")[0] + comments[i].dateComments.split(" ")[1].slice(0,1)
-                                    
+                                    //* On contruit l'avatar des utilisateurs
+                                    comments[i].avatar = `${req.protocol}://${req.get('host')}/media/avatar/${comments[i].avatar}`
+
                                 }
 
                                 //* On injecte les commentaires du post dans le résultat (tout)
@@ -179,6 +185,8 @@ exports.recoverOne = (req, res) => {
                                 results[0].datePost = datefns.formatDistanceStrict(Date.now(), results[0].datePost, {addSuffix: false, locale: fr})
                                 //* On contruit l'url du fichier associés au post
                                 results[0].media = `${req.protocol}://${req.get('host')}/media/${results[0].media}`
+                                //* On contruit l'avatar du propriétaire du post
+                                results[0].avatar = `${req.protocol}://${req.get('host')}/media/avatar/${results[0].avatar}`
                                 //* On donne une position au post (utile pour VUE.JS)
                                 results[0].position = 0
                                 

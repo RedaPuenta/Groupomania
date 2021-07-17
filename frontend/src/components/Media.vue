@@ -189,23 +189,38 @@ export default {
         },
         //! Fonction qui permet de supprimer un post
         deletePost: function(event){
-            
-            const postId = event.target.dataset.id
-            
-            this.$axios.delete(`/multimedia/post/${postId}`)
-            .then(() => {
 
-                if(this.focus == false){
-                    document.location.reload()
-                } else if(this.focus == true){
-                    this.$router.push({name: "Multimedia"})
-                }
+            this.$dialog.confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')
+            .then((dialog) => {
+
+                const postId = event.target.dataset.id
+            
+                this.$axios.delete(`/multimedia/post/${postId}`)
+                .then(() => {
+
+                    if(this.focus == false){
+
+                        dialog.close()
+                        document.location.reload()
+                        
+                    } else if(this.focus == true){
+
+                        dialog.close()
+                        this.$router.push({name: "Multimedia"})
+                        
+                    }
+
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
 
             })
-            .catch((error) => {
-                console.log(error)
+            .catch(() => {
+                event.target.parentElement.style.display = "none"
+                event.target.parentElement.parentElement.children[1].dataset.active = "false"
             })
-
+            
         },
         //! Fonction qui permet de liker un post
         likePost: function(event){

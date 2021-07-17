@@ -3,6 +3,7 @@ import App from './App.vue'
 import store from './store'
 import router from './router'
 import axios from "axios"
+import VuejsDialog from 'vuejs-dialog';
 
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@fortawesome/fontawesome-free/js/all.js'
@@ -15,6 +16,14 @@ const token = localStorage.getItem("token")
 if(token !== null){
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
 }
+
+Vue.use(VuejsDialog, {
+  html: true,
+  loader: true,
+  okText: 'Oui',
+  cancelText: 'Non',
+  animation: 'bounce'
+})
 
 Vue.prototype.$axios = axios
 

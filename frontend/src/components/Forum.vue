@@ -182,20 +182,35 @@ export default {
         //! Fonction qui permet de supprimer un post
         deletePost: function(event){
             
+            this.$dialog.confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')
+            .then((dialog) => {
+
             const postId = event.target.dataset.id
             
-            this.$axios.delete(`/agora/post/${postId}`)
-            .then(() => {
+                this.$axios.delete(`/agora/post/${postId}`)
+                .then(() => {
 
-                if(this.focus == false){
-                    document.location.reload()
-                } else if(this.focus == true){
-                    this.$router.push({name: "Agora"})
-                }
+                    if(this.focus == false){
+
+                        dialog.close()
+                        document.location.reload()
+
+                    } else if(this.focus == true){
+
+                        dialog.close()
+                        this.$router.push({name: "Agora"})
+                        
+                    }
+
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
 
             })
-            .catch((error) => {
-                console.log(error)
+            .catch(() => {
+                event.target.parentElement.style.display = "none"
+                event.target.parentElement.parentElement.children[1].dataset.active = "false"
             })
 
         },

@@ -187,30 +187,57 @@ export default {
         //! Fonction qui permet de déconnecter un utilisateur
         deconnect: function(){
 
-            localStorage.clear()
-            this.$router.push({name: 'Connexion'})
+            this.$dialog.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')
+            .then((dialog) => {
+
+                localStorage.clear()
+                this.$router.push({name: 'Connexion'})
+                dialog.close()
+                
+            })
+            .catch(() => {
+                this.toggle = false
+            })
+        },
+        //! Fonction qui sert uniquement à la fonction ci dessous !
+        textConfirmCustom: function(){
+            if(this.privilege > 1 && this.$route.params.id !== localStorage.getItem("userId").toString()){
+                return 'supprimer son compte'
+            } else {
+                return 'supprimer votre compte'
+            }
         },
         //! Fonction qui permet de supprimer un utilisateur
         deleteUser: function(){
+            
+            const textCustom = this.textConfirmCustom()
+
+            this.$dialog.confirm(`Êtes-vous sûr de vouloir ${textCustom} ?`)
+            .then((dialog) => {
 
             const userId = this.$route.params.id
 
-            this.$axios.delete(`/user/${userId}`)
-            .then(() => {
+                this.$axios.delete(`/user/${userId}`)
+                .then(() => {
 
-                if(this.privilege == 1 || this.$route.params.id == localStorage.getItem("userId")){
+                    if(this.privilege == 1 || this.$route.params.id == localStorage.getItem("userId")){
 
-                    localStorage.clear()
-                    this.$router.push({name: 'Connexion'})
+                        localStorage.clear()
+                        this.$router.push({name: 'Connexion'})
+                        dialog.close()
 
-                } else{
+                    } else{
 
-                    this.$router.push({name: 'Friends'})
-                }
+                        this.$router.push({name: 'Friends'})
+                        dialog.close()
+                        
+                    }
 
-            })
-            .catch((error) => {
-                console.log(error)
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+
             })
 
         }
@@ -236,6 +263,7 @@ export default {
             }
         })
         .then(() => {
+            
             //* On détermine si la page "Profil" sur laquelle l'utilisateur se trouve lui appartient
             if(userId == this.$route.params.id || this.privilege > 1){
                 this.us = true

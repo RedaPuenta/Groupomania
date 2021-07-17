@@ -248,18 +248,8 @@ exports.deletePost = (req, res) => {
         //: Gestion des erreurs
         if(error == null) {
 
-            //* On supprime les commentaires associés à ce post
-            db.query(dbRequest.deleteCommentsForPost(postId), function(){
-
-                //* On supprime les likes associés à ce post
-                db.query(dbRequest.deleteLikesForPost(postId), function(){
-
-                    res.status(200).json({message: "Félicitation, votre publication a été supprimée"})
-                        
-                })
-
-            }) 
-
+            res.status(200).json({message: "Félicitation, votre publication a été supprimée"})
+              
         //: Gestion des erreurs
         } else {
             res.status(500).json({message: "Désolé, votre publication n'a pu être supprimée !"})

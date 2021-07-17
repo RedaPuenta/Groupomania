@@ -9,6 +9,9 @@ module.exports = (req, res, next) => {
     //* On déclare le regex "ANTI-INJECTION"
     const regexAntiInjection = /[<>}{_|^*~$]/
 
+    //* On déclare les mimetypes valides
+    const typeValid = ["image/jpeg", "image/jpg", "image/png", "image/gif", "video/mp4"]
+
     //* On créer une fonction pour supprimer le fichier précédemment télécharger (si il y en a un)
     function deleteImage() {
         if(req.file) {
@@ -20,10 +23,13 @@ module.exports = (req, res, next) => {
 
     //* On configure un tableau contenant tout les conditions à vérifier et leur réponse
     const cas = [
-        {condition: field == "" || !/[a-zA-Z]/.test(field), réponse: `Vous avez oublié de renseigner une légende`, active: true},
-        {condition: regexAntiInjection.test(field), réponse: `Certains caractères contenu dans votre légende ne sont pas acceptables`, active: true},
-        {condition: field.length > 100, réponse: `Votre légende est trop longue (max 100 caractères)`, active: true},
-        {condition: !req.file, réponse: `Votre publication ne contient pas de fichier`, active: false}
+        {condition: field == "" || !/[a-zA-Z]/.test(field), réponse: `Vous avez oublié de renseigner une légende`, deleteFile: true},
+        {condition: regexAntiInjection.test(field), réponse: `Certains caractères contenu dans votre légende ne sont pas acceptables`, deleteFile: true},
+        {condition: field.length > 100, réponse: `Votre légende est trop longue (max 100 caractères)`, deleteFile: true},
+        {condition: !req.file, réponse: `Votre publication ne contient pas de fichier`, deleteFile: false},
+        {condition: req.file && typeValid.indexOf(req.file.mimetype) == -1, réponse: "Le format du fichier n'est pas autorisé", deleteFile: true},
+        {condition: req.file && typeValid.indexOf(req.file.mimetype) < 4 && req.file.size/1024/1024 > 5, réponse: "Le fichier est trop lourd (max 5MB pour jpg, png, gif)", deleteFile: true},
+        {condition: req.file && typeValid.indexOf(req.file.mimetype) == 4 && req.file.size/1024/1024 > 20, réponse: "Le fichier est trop lourd (max 20MB pour mp4)", deleteFile: true},
     ]
 
     //* On configure un système de point
@@ -37,7 +43,7 @@ module.exports = (req, res, next) => {
         if(cas[i].condition){
 
             //* On supprime le fichier précédemment télécharger quand il le faut (si il y en a un)
-            if(cas[i].active == true){
+            if(cas[i].deleteFile == true){
                 deleteImage()
             }
 

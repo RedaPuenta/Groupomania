@@ -116,37 +116,55 @@ export default {
             this.new_write = false
             this.$emit('blur-control', {blur: false})
         },
-        //! Fonction qui permet de pré-afficher le fichier qui a été chargé
+        //! Fonction qui permet de pré-afficher le fichier qui a été chargé avec quelques vérification
         controlFile: async function(event){
-
+            
             const typeValid = ["image/jpeg", "image/jpg", "image/png", "image/gif", "video/mp4"]
-
+            
             if(typeValid.indexOf(event.target.files[0].type) == -1) {
-
+        
                 await this.$store.commit("ACTIVE_ERROR", "Le format du fichier n'est pas autorisé")
-
-            } else { 
+                this.cancelUpload()
+                
+            } else {
                 
                 await this.$store.commit("DESACTIVE_ERROR")
                 this.fileExe = await true
 
                 if (typeValid.indexOf(event.target.files[0].type) < 4) {
                     
-                    this.fileExeType = await 'image'
+                    if(event.target.files[0].size/1024/1024 > 5){
 
-                    this.file = await event.target.files[0]
-                    const fileMedia = await event.target.files[0]
-                    const blockMedia = await this.$refs.mediaImage
-                    blockMedia.src = await URL.createObjectURL(fileMedia)
+                        this.$store.commit("ACTIVE_ERROR", "Le fichier est trop lourd (max 5MB pour jpg, png, gif)")
+                        this.cancelUpload()
+
+                    } else {
+
+                        this.fileExeType = await 'image'
+
+                        this.file = await event.target.files[0]
+                        const fileMedia = await event.target.files[0]
+                        const blockMedia = await this.$refs.mediaImage
+                        blockMedia.src = await URL.createObjectURL(fileMedia)
+                    }
                     
-                } else {
+                } else if ((typeValid.indexOf(event.target.files[0].type) == 4)){
 
-                    this.fileExeType = await 'video'
+                    if(event.target.files[0].size/1024/1024 > 20){
 
-                    this.file = await event.target.files[0]
-                    const fileMedia = await event.target.files[0]
-                    const blockMedia = await this.$refs.mediaVideo
-                    blockMedia.src = await URL.createObjectURL(fileMedia)
+                        this.$store.commit("ACTIVE_ERROR", "Le fichier est trop lourd (max 20MB pour mp4)")
+                        this.cancelUpload()
+
+                    } else {
+
+                        this.fileExeType = await 'video'
+
+                        this.file = await event.target.files[0]
+                        const fileMedia = await event.target.files[0]
+                        const blockMedia = await this.$refs.mediaVideo
+                        blockMedia.src = await URL.createObjectURL(fileMedia)
+
+                    }
 
                 }
             }

@@ -1,3 +1,5 @@
+/*** ACCOUNT ***/ 
+
 //! Requête qui permet de créer un utilisateur
 //-INSERT --> email, password, firstName, lastName, userId, avatar, bio
 exports.register = function(email, password, firstName, lastName, userId, avatar, bio){
@@ -14,6 +16,17 @@ exports.login = function(email){
     SELECT userId, firstConnection, password FROM user 
     WHERE email = "${email}"`
 }
+
+//! Requête qui permet de savoir un email existe déjà
+//-SELECT --> COUNT(email)
+//~WITH --> email
+exports.emailUse = function(email){
+    return`
+    SELECT COUNT(email) AS exist FROM user 
+    WHERE email = "${email}"`
+}
+
+/*** USER ***/ 
 
 //! Requête qui permet récupèrer des infos sur un utilisateur (NAVBAR ET PAGE INFO)
 //-SELECT --> firstName, lastName, bio, avatar, userId
@@ -67,21 +80,38 @@ exports.recoverForProfil = function(userId){
     ON comments.userId = req3.userId`
 }
 
-//! Requête qui permet de savoir un email existe déjà
-//-SELECT --> COUNT(email)
-//~WITH --> email
-exports.emailUse = function(email){
-    return`
-    SELECT COUNT(email) AS exist FROM user 
-    WHERE email = "${email}"`
+//! Requête qui permet de modifier des informations sur un utilisateur
+//-UPDATE --> avatar, bio, firstName, lastName, firstConnection, userId
+exports.updateUser = function(avatar, bio, firstName, lastName, firstConnection, userId){
+    return `
+    UPDATE user SET 
+    avatar = "${avatar}",
+    bio = "${bio}",
+    firstName = "${firstName}",
+    lastName = "${lastName}",
+    firstConnection = "${firstConnection}"
+    WHERE userId = "${userId}"`
 }
 
-//! Requête qui permet de connaître le privilège d"un utilisateur
-//-SELECT --> privilege
+//! Requête qui permet de supprimer un utilisateur
+//-DELETE
 //~WITH --> userId
-exports.privilegeUser = function(userId){
-    return `SELECT privilege FROM user WHERE userId = "${userId}"`
+exports.deleteUser = function(userId){
+    return `
+    DELETE FROM user 
+    WHERE userId = "${userId}"`
 }
+
+//! Requête qui permet tout les noms de fichier qui ont été créés par un utilisateur
+//-SELECT --> media
+//~WITH --> userId
+exports.selectCurrentFileUser = function(userId){
+    return `
+    SELECT media FROM multimedia
+    WHERE userId = "${userId}"`
+}
+
+/*** AGORA ET MULTIMEDIA ***/ 
 
 //! Requête qui permet de récupérer de mulitples informations sur une publication
 //-SELECT --> postId, userId, avatar, firstName, lastName, legend, media, likes, comments, my_post, my_like, my_comments, datePost
@@ -182,50 +212,7 @@ exports.selectCurrentFilePost = function(postId){
     WHERE postId = "${postId}"`
 }
 
-//! Requête qui permet tout les noms de fichier qui ont été créés par un utilisateur
-//-SELECT --> media
-//~WITH --> userId
-exports.selectCurrentFileUser = function(userId){
-    return `
-    SELECT media FROM multimedia
-    WHERE userId = "${userId}"`
-}
-
-//! Requête qui permet de connaître le propriétaire d"une publication
-//-SELECT --> userId
-//~WITH --> postId
-exports.selectAuthPost = function(postId){
-
-    return `
-    SELECT userId FROM multimedia
-    WHERE postId = "${postId}"
-    UNION
-    SELECT userId FROM forum
-    WHERE postId = "${postId}"`
-
-}
-
-//! Requête qui permet de modifier des informations sur un utilisateur
-//-UPDATE --> avatar, bio, firstName, lastName, firstConnection, userId
-exports.updateUser = function(avatar, bio, firstName, lastName, firstConnection, userId){
-    return `
-    UPDATE user SET 
-    avatar = "${avatar}",
-    bio = "${bio}",
-    firstName = "${firstName}",
-    lastName = "${lastName}",
-    firstConnection = "${firstConnection}"
-    WHERE userId = "${userId}"`
-}
-
-//! Requête qui permet de supprimer un utilisateur
-//-DELETE
-//~WITH --> userId
-exports.deleteUser = function(userId){
-    return `
-    DELETE FROM user 
-    WHERE userId = "${userId}"`
-}
+/*** ACTION ***/ 
 
 //! Requête qui permet de savoir si un utilisateur a liké ou disliké une publication
 //-SELECT --> COUNT(likes)
@@ -272,22 +259,37 @@ exports.deleteComments = function(id){
     WHERE id = "${id}"`
 }
 
-//! Requête qui permet de supprimer tout les commentaires associés à une publication
-//-DELETE
-//~WITH --> postId
-exports.deleteCommentsForPost = function(postId){
-    return `
-    DELETE FROM comments
-    WHERE postId = "${postId}"`
+/*** ASSET ***/ 
+
+//! Requête qui permet de récupérer tout les avatars du site
+//-SELECT --> *
+exports.avatarList = function(){
+    return`
+    SELECT * FROM list_avatar
+    ORDER BY avatar ASC`
 }
 
-//! Requête qui permet de supprimer tout les likes associés à une publication
-//-DELETE
+/*** SECUTITE ***/ 
+
+//! Requête qui permet de connaître le privilège d"un utilisateur
+//-SELECT --> privilege
+//~WITH --> userId
+exports.privilegeUser = function(userId){
+    return `SELECT privilege FROM user WHERE userId = "${userId}"`
+}
+
+//! Requête qui permet de connaître le propriétaire d"une publication
+//-SELECT --> userId
 //~WITH --> postId
-exports.deleteLikesForPost = function(postId){
+exports.selectAuthPost = function(postId){
+
     return `
-    DELETE FROM likes
+    SELECT userId FROM multimedia
+    WHERE postId = "${postId}"
+    UNION
+    SELECT userId FROM forum
     WHERE postId = "${postId}"`
+
 }
 
 //! Requête qui permet de connaître le propriétaire d'un commentaire
@@ -297,12 +299,4 @@ exports.selectAuthComments = function(id){
     return `
     SELECT userId FROM comments
     WHERE id = "${id}"`
-},
-
-//! Requête qui permet de récupérer tout les avatars du site
-//-SELECT --> *
-exports.avatarList = function(){
-    return`
-    SELECT * FROM list_avatar
-    ORDER BY avatar ASC`
 }

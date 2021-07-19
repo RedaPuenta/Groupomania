@@ -54,8 +54,17 @@ export default {
 
     //! Avant la création de la page ...
     beforeCreate: function(){
-        //! On exécute la fonction qui permet d'autorisé un visiteur d'accéder aux pages du site
-        this.$store.dispatch('accessPage')
+
+        //! On exécute la fonction qui permet de mettre à jour le userId dans le store (choix entre local et session)
+        this.$store.dispatch('majUserId')
+        .then(() => {
+            //! On exécute la fonction qui permet d'autorisé un visiteur d'accéder aux pages du site
+            this.$store.dispatch('accessPage')
+        })
+        .catch(() => {
+            this.$router.push({name: "Connexion"})
+        })
+        
     },
 
     //! Quand la page est monté ...

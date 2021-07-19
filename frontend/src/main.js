@@ -11,9 +11,21 @@ import '@fortawesome/fontawesome-free/js/all.js'
 //! Chaque requête Axios commence par ce début d'URL (par défaut)
 axios.defaults.baseURL = 'http://localhost:3000/api/'
 
+//! Fonction qui permet de récupérer le token
+function getToken() {
+  if(sessionStorage.getItem("token") == null && localStorage.getItem("token") !== null ){
+    return localStorage.getItem("token")
+  } else if (localStorage.getItem("token") == null && sessionStorage.getItem("token") !== null){
+    return sessionStorage.getItem("token")
+  } else {
+    return undefined
+  }
+}
+
 //! Dans chaque requêtes, on fixe automatiquement le token d'authentification obtenu lors de la connnexion
-const token = localStorage.getItem("token")
-if(token !== null){
+const token = getToken()
+
+if(token !== null && token !== undefined && token !== ""){
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
 }
 

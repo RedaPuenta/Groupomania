@@ -7,6 +7,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    //! Variable qui contient le userId de l'utilisateur
+    userId: "",
     //! Variables (composant Error)
     errorAlert: false,
     errorText: "",
@@ -29,6 +31,17 @@ export default new Vuex.Store({
       state.errorAlert = true
       state.errorText = text
     },
+
+    //! Met à jour le userId
+    USER_ID: function(state){
+      if(sessionStorage.getItem("userId") == null && localStorage.getItem("userId") !== null){
+        state.userId = localStorage.getItem("userId")
+      } else if (localStorage.getItem("userId") == null && sessionStorage.getItem("userId") !== null){
+        state.userId = sessionStorage.getItem("userId")
+      } else {
+        state.userId = undefined
+      }
+    }
 
   },
   actions: {
@@ -76,19 +89,29 @@ export default new Vuex.Store({
       }
     },
 
+    //! Fonction qui met à jour le userId de l'utilisateur
+    majUserId: function(context){
+      context.commit("USER_ID")
+    },
+
     //! Fonction qui permet d'autorisé un visiteur d'accéder aux pages du site
-    accessPage: function(){
-      
-      const userId = localStorage.getItem("userId")
-      if (userId !== null) {
+    accessPage: function(context){
+  
+      const userId = context.state.userId
+    
+      if (userId !== null && userId !== undefined && userId!== "") {
 
         axios.get(`/account/${userId}`)
         .catch(() => {
+          localStorage.clear()
+          sessionStorage.clear()
           router.push({name: 'Connexion'})
         })
 
       } else {
 
+        localStorage.clear()
+        sessionStorage.clear()
         router.push({name: 'Connexion'})
         
       }

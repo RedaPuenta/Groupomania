@@ -224,8 +224,8 @@ export default {
         },
         //! Fonction qui permet de liker un post
         likePost: function(event){
-        
-            const userId = localStorage.getItem("userId")
+            
+            const userId = this.$store.state.userId
             const postId = event.target.parentElement.dataset.id
             
             this.$axios.post('/action/like', {postId: postId, userId: userId})
@@ -266,7 +266,7 @@ export default {
             this.$store.commit("DESACTIVE_ERROR")
 
             const postId = this.$route.params.id
-            const userId = localStorage.getItem("userId")
+            const userId = this.$store.state.userId
             const comments = this.comments
 
             this.$axios.post('/action/', {postId: postId, userId: userId, reaction: comments})
@@ -310,7 +310,7 @@ export default {
         apiBody: function(){
 
             const focus = this.focus
-            const userId = localStorage.getItem("userId")
+            const userId = this.$store.state.userId
             const preference = this.preference
             const postId = this.$route.params.id
 

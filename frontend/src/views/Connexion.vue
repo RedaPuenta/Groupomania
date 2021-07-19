@@ -81,7 +81,6 @@
 <script>
 import Error from '@/components/Error.vue'
 
-
 export default {
     name: 'Home',
 
@@ -137,16 +136,15 @@ export default {
 
                 this.$axios.defaults.headers.common["Authorization"] = "Bearer " + token
 
-                localStorage.setItem("userId", userId)
-                localStorage.setItem("token", token)
-
                 if(this.autoConnect == true) {
 
-                    localStorage.setItem("connexion", "auto")
+                    localStorage.setItem("userId", userId)
+                    localStorage.setItem("token", token)
 
                 } else {
 
-                    localStorage.setItem("connexion", "manuel")
+                    sessionStorage.setItem("userId", userId)
+                    sessionStorage.setItem("token", token)
 
                 }
 
@@ -220,30 +218,33 @@ export default {
     },
 
     //! Avant la création de la page, on applique la logique relative au "maintien de connexion"
-    beforeCreate: function(){
+    beforeMount: function(){
+        
+        this.$store.dispatch("majUserId")
+        .then(() => {
 
-        //* On récupère le "userId" et le "témoin de maintient de connexion" dans le local Storage
-        const userIdLocal = localStorage.getItem("userId")
-        const modeConnexion = localStorage.getItem("connexion")
+            //* On récupère le "userId"
+            const userId = this.$store.state.userId
 
-        //* Si le témoin de maintien de connexion est avait été cochée ...
-        if (modeConnexion == "auto") {
+            //* Si le témoin de maintien de connexion est avait été cochée ...
+            if (userId !== null && userId !== undefined && userId !== "") {
 
-            //* On renvoie le visiteur directement sur la page d'accueil
-            this.$axios.post('/access', {userId: userIdLocal})
-            .then(() => {
+                //* On renvoie le visiteur directement sur la page d'accueil
                 this.$router.push({name: "Multimedia"})
-            })
-            .catch(() => {
+                
+            //* Sinon ...
+            } else {
+
+                //* On nettoie le localStorage et le sessionStorage
                 localStorage.clear()
-            })
-            
-        //* Sinon, on nettoie le local Storage
-        } else {
+                sessionStorage.clear()
 
+            }
+        })
+        .catch(() => {
             localStorage.clear()
-
-        }
+            sessionStorage.clear()
+        })
 
     },
     

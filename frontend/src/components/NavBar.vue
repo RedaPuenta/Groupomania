@@ -191,6 +191,7 @@ export default {
             .then((dialog) => {
 
                 localStorage.clear()
+                sessionStorage.clear()
                 this.$router.push({name: 'Connexion'})
                 dialog.close()
                 
@@ -201,7 +202,7 @@ export default {
         },
         //! Fonction qui sert uniquement à la fonction ci dessous !
         textConfirmCustom: function(){
-            if(this.privilege > 1 && this.$route.params.id !== localStorage.getItem("userId").toString()){
+            if(this.privilege > 1 && this.$route.params.id !== this.$store.state.userId.toString()){
                 return 'supprimer son compte'
             } else {
                 return 'supprimer votre compte'
@@ -220,9 +221,10 @@ export default {
                 this.$axios.delete(`/user/${userId}`)
                 .then(() => {
 
-                    if(this.privilege == 1 || this.$route.params.id == localStorage.getItem("userId")){
+                    if(this.privilege == 1 || this.$route.params.id == this.$store.state.userId){
 
                         localStorage.clear()
+                        sessionStorage.clear()
                         this.$router.push({name: 'Connexion'})
                         dialog.close()
 
@@ -246,7 +248,7 @@ export default {
     //! Avant que la page soit monté ...
     beforeMount: function(){
 
-        const userId = localStorage.getItem("userId")
+        const userId = this.$store.state.userId
         
         //! On récupère les informations de l'utilisateur inscrit dans la barre de navigation
         this.$axios.get(`user/info/${userId}`)
@@ -257,7 +259,7 @@ export default {
         })
         .then(() => {
             if(this.mode == 'accueil'){
-                this.userId = localStorage.getItem("userId")
+                this.userId = this.$store.state.userId
             } else if(this.mode == 'account'){
                 this.userId = this.$route.params.id
             }
@@ -269,7 +271,7 @@ export default {
                 this.us = true
             }
 
-            if(this.privilege > 1 && this.$route.params.id !== localStorage.getItem("userId").toString()){
+            if(this.privilege > 1 && this.$route.params.id !== this.$store.state.userId.toString()){
                 this.text_delete = "Supprimer son compte"
                 this.text_update = "Modifier ses informations"
             } else {

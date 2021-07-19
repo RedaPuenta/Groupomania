@@ -191,7 +191,7 @@ export default {
         //! Fonction qui permet de changer le corps des requêtes (selon la view --> props MODE)
         getBody: function(){
 
-            const userId = localStorage.getItem("userId")
+            const userId = this.$store.state.userId
 
             if(this.multimedia == true) {
 
@@ -226,46 +226,38 @@ export default {
         //! Fonction qui permet de publier un contenu
         newPost: function(){
             
-            if(localStorage.getItem("token") !== null && localStorage.getItem("userId") !== null){
+            const adresse = this.getApi()
+            const body = this.getBody()
+            const headers = this.getHeaders()
+            
+            this.$axios.post(adresse, body, headers)
+            .then((response) => {
+                this.stopSend =  true
+                this.$store.commit("DESACTIVE_ERROR")
+                this.fileExeType = "loading"
+                this.textButton = "Votre publication est en cours d'enrengistrement ..." 
 
-                const adresse = this.getApi()
-                const body = this.getBody()
-                const headers = this.getHeaders()
-                
-                this.$axios.post(adresse, body, headers)
-                .then((response) => {
-                    this.stopSend =  true
-                    this.$store.commit("DESACTIVE_ERROR")
-                    this.fileExeType = "loading"
-                    this.textButton = "Votre publication est en cours d'enrengistrement ..." 
+                setTimeout(function(){
+
+                    this.textButton = JSON.parse(response.request.response).message
 
                     setTimeout(function(){
 
-                        this.textButton = JSON.parse(response.request.response).message
-
-                        setTimeout(function(){
-
-                            this.file = ""
-                            this.new_write = false
-                            this.$emit('blur-control', {blur: false})
-                            document.location.reload()
-
-                        }.bind(this), 1500)
-        
+                        this.file = ""
+                        this.new_write = false
+                        this.$emit('blur-control', {blur: false})
+                        document.location.reload()
 
                     }.bind(this), 1500)
+    
 
-                })  
-                .catch((error) => {
-                    this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)
-                })
+                }.bind(this), 1500)
 
-            } else {
-
-                localStorage.clear()
-                this.$router.push({name: 'Connexion'})
-            }
-        
+            })  
+            .catch((error) => {
+                this.$store.commit("ACTIVE_ERROR", JSON.parse(error.request.response).message)
+            })
+           
         }
     },
 

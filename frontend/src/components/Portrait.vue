@@ -119,7 +119,7 @@ export default {
         //! Fonction qui permet de changer l'adresse des requêtes (selon la view --> props FOCUS)
         adresseAPI: function(){
 
-            const userIdLocal = localStorage.getItem("userId")
+            const userIdLocal = this.$store.state.userId
             const userIdUrl = this.$route.params.id
 
             if(this.mode == 'Friends'){

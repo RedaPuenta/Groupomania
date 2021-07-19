@@ -44,7 +44,8 @@
             
 
             <!---- Bouton de soumission ---->
-            <button @click="updateInfo">{{buttonText}}</button>
+            <button v-if="desactiveButton == false" @click="updateInfo">{{buttonText}}</button>
+            <button v-if="desactiveButton == true" >{{buttonText}}</button>
         </div>
         
         <!---- Lien de retour à l'accueil ---->
@@ -79,7 +80,9 @@ export default {
             lastName: "",  
             avatar: "",
             //! Variable qui contient le texte du bouton de soumission
-            buttonText: "Enrengistrer et continuer"
+            buttonText: "Enrengistrer et continuer",
+            //! Variable qui permet de désactiver l'évènement sur le bouton de soummission
+            desactiveButton: false
         }
     },  
 
@@ -105,6 +108,7 @@ export default {
             this.$axios.put(`/user/${userId}`, {avatar: avatar, bio: bio, firstName: firstName, lastName: lastName})
             .then(() => {
 
+                this.desactiveButton = true
                 this.$store.commit("DESACTIVE_ERROR")
                 this.buttonText = "Enrengistrement en cours ..."
                 

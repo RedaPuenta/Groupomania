@@ -2,3 +2,4 @@ Le 17/6/2021 à 23:11:3:816 [::1] [GET] http://localhost:3000/api/user/info/null
 Le 17/6/2021 à 23:11:3:818 [::1] [POST] http://localhost:3000/api/multimedia/recoverAll [498-unknown] [{"userId":null,"preference":1}]
 Le 17/6/2021 à 23:13:7:526 [::1] [GET] http://localhost:3000/api/user/info/null [498-unknown] [{}]
 Le 17/6/2021 à 23:13:7:527 [::1] [POST] http://localhost:3000/api/multimedia/recoverAll [498-unknown] [{"userId":null,"preference":1}]
+Le 19/6/2021 à 15:50:22:473 [::1] [POST] http://localhost:3000/api/action/ [400-Bad Request] [{"postId":"d322a1a0-e897-11eb-be56-5bc56aa6ba3b","userId":"24b03e80-e742-11eb-9b91-7db6519137d2","reaction":""}]

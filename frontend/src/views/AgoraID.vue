@@ -90,8 +90,10 @@ export default {
         position: relative;
 
         &__navbar{
-            position: relative;
-            z-index: 2;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0px;
+            z-index: 3;
         }
 
         &__contain{ 

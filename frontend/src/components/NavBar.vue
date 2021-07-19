@@ -308,6 +308,7 @@ export default {
     }
 
     .navbar{
+        background-color: $color-secondary;
         border-radius: 0px!important;
         width: 100%;
         height: 100px;

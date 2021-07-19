@@ -100,7 +100,9 @@ export default {
         width: 100%;
 
         &__navbar{
-            position: relative;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0px;
             z-index: 3;
         }
 

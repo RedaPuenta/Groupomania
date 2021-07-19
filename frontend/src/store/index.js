@@ -78,7 +78,7 @@ export default new Vuex.Store({
 
     //! Fonction qui permet d'autorisé un visiteur d'accéder aux pages du site
     accessPage: function(){
-  
+      
       const userId = localStorage.getItem("userId")
       if (userId !== null) {
 

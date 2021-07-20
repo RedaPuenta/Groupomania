@@ -1,3 +1,5 @@
+const regex = require("../regex/regex")
+
 //! Middleware qui permet de vérifier si un nom ou un prénom est valide
 module.exports = (req, res, next) => {
 
@@ -16,7 +18,7 @@ module.exports = (req, res, next) => {
     var points = 0
 
     //* On déclare le regex qui vérifie si un nom est correct
-    const regexName = new RegExp('^[a-zA-Z]{2,}$')
+    const regexName = regex.name()
 
     //* Pour chaque champs ...
     for (let i = 0; i < toVerif.length; i++) {

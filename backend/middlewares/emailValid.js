@@ -1,10 +1,12 @@
+const regex = require("../regex/regex")
+
 //! Middleware qui permet de vérifier si un email est valide
 module.exports = (req, res, next) => {
 
     //* On récupère l'email de l'utilisateur dans  le corps de la requête
     const emailReq = req.body.email
     //* On déclare notre Regex qui vérifié si un email est valide
-    const regexEmail = new RegExp('^[a-zA-Z0-9._%+-]{2,}[@]{1}[a-zA-Z0-9.-]{2,}[.]{1}[a-zA-Z]{2,3}$', 'g')
+    const regexEmail = regex.email()
 
     //* Si l'email de l'utilisateur est en concordance avec le regex ...
     if(emailReq.match(regexEmail)) {

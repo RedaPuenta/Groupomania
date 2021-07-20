@@ -230,7 +230,7 @@ exports.post = (req, res) => {
 
     //* On créer un nouvelle publication dans la base de donnée
     db.query(dbRequest.newPostAgora(userId, postId, titre), function(error){
-
+        console.log(error)
         //: Gestion des erreurs
         if(error == null){
             res.status(201).json({message: "Votre publication a été publiée !"})  

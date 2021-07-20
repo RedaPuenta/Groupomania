@@ -1,13 +1,17 @@
+const regex = require("../regex/regex")
 const fs = require("fs")
 
 //! Middleware qui permet de vérifier si une publication (Multimédia) est valide
 module.exports = (req, res, next) => {
+
+    //* On transforme les doubles guillemets par des guillemets simples (si il y en a)
+    req.body.legend = regex.revokeQuote(req.body.legend)
     
     //* On récupère la légende contenu dans le corps de la requête
     const field = req.body.legend
     
     //* On déclare le regex "ANTI-INJECTION"
-    const regexAntiInjection = /[<>}{_|^*~$]/
+    const regexAntiInjection = regex.antiInjection()
 
     //* On déclare les mimetypes valides
     const typeValid = ["image/jpeg", "image/jpg", "image/png", "image/gif", "video/mp4"]
@@ -28,8 +32,8 @@ module.exports = (req, res, next) => {
         {condition: field.length > 100, réponse: `Votre légende est trop longue (max 100 caractères)`, deleteFile: true},
         {condition: !req.file, réponse: `Votre publication ne contient pas de fichier`, deleteFile: false},
         {condition: req.file && typeValid.indexOf(req.file.mimetype) == -1, réponse: "Le format du fichier n'est pas autorisé", deleteFile: true},
-        {condition: req.file && typeValid.indexOf(req.file.mimetype) < 4 && req.file.size/1024/1024 > 5, réponse: "Le fichier est trop lourd (max 5MB pour jpg, png, gif)", deleteFile: true},
-        {condition: req.file && typeValid.indexOf(req.file.mimetype) == 4 && req.file.size/1024/1024 > 20, réponse: "Le fichier est trop lourd (max 20MB pour mp4)", deleteFile: true},
+        {condition: req.file && typeValid.indexOf(req.file.mimetype) < 4 && req.file.size/1024/1024 > 10, réponse: "Le fichier est trop lourd (max 10MB pour jpg, png, gif)", deleteFile: true},
+        {condition: req.file && typeValid.indexOf(req.file.mimetype) == 4 && req.file.size/1024/1024 > 50, réponse: "Le fichier est trop lourd (max 50MB pour mp4)", deleteFile: true},
     ]
 
     //* On configure un système de point

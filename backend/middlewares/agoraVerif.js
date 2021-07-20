@@ -1,12 +1,17 @@
+const regex = require("../regex/regex")
+
 //! Middleware qui permet de vérifier si une publication (Agora) est valide
 module.exports = (req, res, next) => {
+
+    //* On transforme les doubles guillemets par des guillemets simples (si il y en a)
+    req.body.titre = regex.revokeQuote(req.body.titre)
  
     //* On récupère le titre contenu dans le corps de la requête
     const field = req.body.titre
     
     //* On déclare le regex "ANTI-INJECTION"
-    const regexAntiInjection = /[<>}{_|^*~$]/
-
+    const regexAntiInjection = regex.antiInjection()
+    
     //* On configure un tableau contenant tout les conditions à vérifier et leur réponse
     const cas = [
         {condition: field == "" || !/[a-zA-Z]/.test(field), réponse: `Vous avez oublié de renseigner un titre`},

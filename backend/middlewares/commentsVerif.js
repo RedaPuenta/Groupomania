@@ -1,11 +1,16 @@
+const regex = require("../regex/regex")
+
 //! Middleware qui permet de vérifier si un commentaire de post est valide
 module.exports = (req, res, next) => {
+
+    //* On transforme les doubles guillemets par des guillemets simples (si il y en a)
+    req.body.reaction = regex.revokeQuote(req.body.reaction)
 
     //* On récupère le commentaire contenu dans le corps de la requête
     const field = req.body.reaction
     
     //* On déclare le regex "ANTI-INJECTION"
-    const regexAntiInjection = /[<>}{_|^*~$]/
+    const regexAntiInjection = regex.antiInjection()
 
     //* On configure un tableau contenant tout les conditions à vérifier et leur réponse
     const cas = [

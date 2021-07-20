@@ -133,9 +133,9 @@ export default {
 
                 if (typeValid.indexOf(event.target.files[0].type) < 4) {
                     
-                    if(event.target.files[0].size/1024/1024 > 5){
+                    if(event.target.files[0].size/1024/1024 > 10){
 
-                        this.$store.commit("ACTIVE_ERROR", "Le fichier est trop lourd (max 5MB pour jpg, png, gif)")
+                        this.$store.commit("ACTIVE_ERROR", "Le fichier est trop lourd (max 10MB pour jpg, png, gif)")
                         this.cancelUpload()
 
                     } else {
@@ -150,9 +150,9 @@ export default {
                     
                 } else if ((typeValid.indexOf(event.target.files[0].type) == 4)){
 
-                    if(event.target.files[0].size/1024/1024 > 20){
+                    if(event.target.files[0].size/1024/1024 > 50){
 
-                        this.$store.commit("ACTIVE_ERROR", "Le fichier est trop lourd (max 20MB pour mp4)")
+                        this.$store.commit("ACTIVE_ERROR", "Le fichier est trop lourd (max 50MB pour mp4)")
                         this.cancelUpload()
 
                     } else {

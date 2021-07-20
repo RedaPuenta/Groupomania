@@ -1,3 +1,5 @@
+const regex = require("../regex/regex")
+
 //! Middleware qui vérifie si la bio, le nom et le prénom sont correctes
 module.exports = (req, res, next) => {
 
@@ -7,7 +9,7 @@ module.exports = (req, res, next) => {
     const bio = req.body.bio
 
     //* On déclare le regex "ANTI-INJECTION"
-    const regexAntiInjection = /[<>}{;_|^*~$]/
+    const regexAntiInjection = regex.antiInjectionMore()
     
     //* On configure un tableau contenant tout les champs à vérifier et leur nom d'origine
     const toVerif = [
